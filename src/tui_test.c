@@ -32,19 +32,19 @@
 #define IDC_TREECTRL1    218
 #define IDC_PRINT        219
 
-WNDTEMPL dlg3a[] =
+FRMWNDTEMPL dlg3a[] =
 {
   /* 1st object is always dialog */
-  { "mylistctlproc", "Dialog3", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },
+  /*{ "mylistctlproc", "Dialog3", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },*/
   /* 2nd and others are controls */
   { TLISTCTRL, "",    IDC_TLISTBOX1,  1,  1,  16,  79, 
     TWS_CHILD|TWS_VISIBLE|
-      TLCS_EDITABLE|TLCS_LINEEDIT/*|TLCS_NOSELECTION|TLCS_NOHEADER*/, 0 },
-  { TBUTTON, "Edit",    IDC_EDITCELL,  20,  1,  1,  14, TWS_CHILD|TWS_VISIBLE, 0 },
-  { TBUTTON, "Message",    IDC_MSG,  20,  20,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
-  { TBUTTON, "Close",    IDC_CLOSE,  20,  40,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
+      TLCS_EDITABLE|TLCS_LINEEDIT/*|TLCS_NOSELECTION|TLCS_NOHEADER*/, 0, 0, "List" },
+  { TBUTTON, "Edit",    IDC_EDITCELL,  20,  1,  1,  14, TWS_CHILD|TWS_VISIBLE, 0, 0, "Edit" },
+  { TBUTTON, "Message",    IDC_MSG,  20,  20,  1,  15, TWS_CHILD|TWS_VISIBLE, 0, 0, "Message" },
+  { TBUTTON, "Close",    IDC_CLOSE,  20,  40,  1,  15, TWS_CHILD|TWS_VISIBLE, 0, 0, "Close" },
   /* the last is the end-of-controls */
-  { 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
 WNDTEMPL dlg3[] =
@@ -61,7 +61,7 @@ WNDTEMPL dlg3[] =
 };
 
 
-FRMWNDTEMPL dlg4[] =
+FRMWNDTEMPL dlg4a[] =
 {
   /* 1st object is always dialog */
   /*{ "mylistpagectlproc", "Dialog4", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },*/
@@ -154,8 +154,8 @@ TVOID mywndproc_ondisplayinfo(TWND wnd, DISPLAYINFO* di)
 
 TVOID OpenDlg3()
 {
-        TWND dlg = TuiCreateWndTempl(dlg3, 0);
-        TuiShowWnd(dlg, 1);
+  TWND dlg = TuiCreateWndTempl(dlg3, 0);
+  TuiShowWnd(dlg, 1);
 }
 
 TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
@@ -210,7 +210,7 @@ TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       statusbar = TuiGetWndItem(wnd, IDC_STATUSBAR);
       TuiSendMsg(statusbar,
         TWM_SETTEXTATTRS, 
-        (TWPARAM)TuiGetColor(BLUE_YELLOW),
+        (TWPARAM)TuiGetColor(BLACK_YELLOW),
         (TLPARAM)0);
      /* 
       edit = TuiGetWndItem(wnd, IDC_PASSWORD);
@@ -277,13 +277,13 @@ TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       else if (wparam == IDC_OPENDLG4)
       {/*{ "mylistpagectlproc", "Dialog4", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },*/
         TWND dlg = TuiCreateFrameWndEx(
-                      "mylistpagectlproc",
+                      "mylistctlproc",
                       "Dialog4",
                       TWS_WINDOW|TWS_VISIBLE,
                       0,
                       0, 0, 25, 80,
-                      dlg4, 0);
-        TuiShowWnd(dlg, 1);        
+                      dlg3a, 0);
+        TuiShowWnd(dlg, TUI_TRUE);        
       }
       else if (wparam == IDC_CLOSE)
       {
@@ -893,6 +893,19 @@ TLONG myframepageproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
   return TuiDefFrameWndProc(wnd, msg, wparam, lparam);
 }
 
+TUI_ACCEL accel[] =
+{
+#ifdef __USE_CURSES__
+  { KEY_F(6), IDC_OPENDLG3 },
+  { KEY_F(7), IDC_OPENDLG4 },
+#elif __USE_WIN32__
+  { TVK_F6, IDC_OPENDLG3 },
+  { TVK_F7, IDC_OPENDLG4 },
+#endif
+  /* last */
+  { 0, 0 }
+};
+
 int main(int argc, char* argv[])
 {
   TMSG msg;
@@ -906,6 +919,8 @@ int main(int argc, char* argv[])
   TuiRegisterCls("myframepageproc", myframepageproc);
   TuiRegisterCls("mylistpagectlproc", mylistpagectlproc);
   TuiRegisterCls("mytreectlproc", mytreectlproc);
+  
+  TuiLoadAccel((TUI_ACCEL*)&accel);
   
   wnd = TuiCreateFrameWndEx(
           "mywndproc",

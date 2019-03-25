@@ -28,8 +28,8 @@ TLONG _TSTC_OnCreate(TWND wnd)
 
 TVOID _TSTC_OnPaint(TWND wnd, TDC dc)
 {
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
-  TTCHAR text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   TRECT rc;
   TDWORD attrs;
 

@@ -35,8 +35,8 @@ TLONG BUTTONPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 TVOID _TBTN_OnPaint(TWND wnd, TDC dc)
 {
   TLONG len = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
-  TTCHAR text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   TDWORD attrs = TuiGetWndTextAttrs(wnd);
   TRECT rc;
   PTBUTTON btn = 0;
@@ -133,15 +133,15 @@ TVOID _TBTN_OnDestroy(TWND wnd)
 TVOID _TBTN_OnKeyDown(TWND wnd, TLONG ch)
 {
   PTBUTTON btn = (PTBUTTON)TuiGetWndParam(wnd);
-  TINT repaTINT = 0;
+  TINT repaint = 0;
   
   switch (ch)
   {
     case TVK_SPACE:
-      repaTINT = 1;
+      repaint = 1;
       break;
   }
-  if (repaTINT)
+  if (repaint)
   {
     btn->state = TBS_PRESSED;
     TuiInvalidateWnd(wnd);

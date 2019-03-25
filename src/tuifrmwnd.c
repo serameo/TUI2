@@ -418,7 +418,7 @@ TVOID _TFRMWND_OnShowMsgBox(TWND wnd, SHOWMSGBOX* param)
   TRECT rect;
   TRECT rc;
   TINT i;
-  TTCHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
   /*TDWORD attrs = TuiGetWndTextAttrs(wnd);*/
   TDC dc = TuiGetDC(wnd);
   TWND btns[] = { frmwnd->btnyes, frmwnd->btnno, frmwnd->btnok, frmwnd->btncancel, 0 };
@@ -461,7 +461,7 @@ TVOID _TFRMWND_OnShowMsgBox(TWND wnd, SHOWMSGBOX* param)
   TuiGetWndRect(wnd, &rect);
   caplen = strlen(param->caption);
   textlen = strlen(param->text);
-  wndwidth = MAX(btnwidth, MAX(caplen, textlen));
+  wndwidth = TUI_MAX(btnwidth, TUI_MAX(caplen, textlen));
   if (wndwidth % 2 == 1)
   {
     ++wndwidth;
@@ -541,7 +541,7 @@ TVOID _TFRMWND_OnShowInputBox(TWND wnd, SHOWMSGBOX* param)
   TRECT rect;
   TRECT rc;
   TINT i;
-  TTCHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
   /*TDWORD attrs = TuiGetWndTextAttrs(wnd);*/
   TDC dc = TuiGetDC(wnd);
   TWND btns[] = { frmwnd->btnok, frmwnd->btncancel, 0 };
@@ -570,7 +570,7 @@ TVOID _TFRMWND_OnShowInputBox(TWND wnd, SHOWMSGBOX* param)
   TuiGetWndRect(wnd, &rect);
   caplen = strlen(param->caption);
   textlen = strlen(param->text);
-  wndwidth = MAX(btnwidth, MAX(caplen, textlen));
+  wndwidth = TUI_MAX(btnwidth, TUI_MAX(caplen, textlen));
   if (wndwidth % 2 == 1)
   {
     ++wndwidth;
@@ -639,12 +639,12 @@ TVOID _TFRMWND_OnShowLineInputBox(TWND wnd, SHOWMSGBOX* param)
   TFRAMEWND frmwnd = TuiGetWndParam(wnd);
   TRECT rc;
   TRECT rcwnd;
-  TTCHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
   /*TDWORD attrs = TuiGetWndTextAttrs(wnd);*/
   TDC dc = TuiGetDC(wnd);
   TLONG textlen = 0;
   TLONG ch = 0;
-  TTCHAR* psz;
+  TUI_CHAR* psz;
   TINT   x = 0;
 
   memcpy(&frmwnd->msgbox, param, sizeof(SHOWMSGBOX));
@@ -703,7 +703,7 @@ TVOID _TFRMWND_OnShowLineInputBox(TWND wnd, SHOWMSGBOX* param)
       psz = strchr(param->validch, (TINT)ch);
       if (psz)
       {
-        TuiPutChar(dc, rc.y, x, (TTCHAR)ch, TuiGetSysColor(COLOR_BTNFOCUSED));
+        TuiPutChar(dc, rc.y, x, (TUI_CHAR)ch, TuiGetSysColor(COLOR_BTNFOCUSED));
         TuiMoveYX(dc, rc.y, x);
         buf[0] = ch;
       }

@@ -19,15 +19,15 @@
 
 struct _TEDITSTRUCT
 {
-  TTCHAR            editbuf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR            editbuf[TUI_MAX_WNDTEXT+1];
   TINT              firstvisit;
-  TTCHAR            passchar;
+  TUI_CHAR            passchar;
   TINT              showpass;
   TINT              firstchar;
   TINT              limitchars;
   TINT              editing;
   TINT              decwidth;
-  TTCHAR            validstr[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR            validstr[TUI_MAX_WNDTEXT+1];
   TINT              min;
   TINT              max;
   TINT              onminmax;
@@ -59,7 +59,7 @@ TLONG _TEDT_OnKillFocus(TWND wnd);
 TVOID _TEDT_OnChar(TWND wnd, TLONG ch);
 TVOID _TEDT_OnPaint(TWND wnd, TDC dc);
 TVOID _TEDT_OnLimitText(TWND wnd, TINT limit);
-TVOID _TEDT_OnSetPasswdChar(TWND wnd, TTCHAR passchar);
+TVOID _TEDT_OnSetPasswdChar(TWND wnd, TUI_CHAR passchar);
 TVOID _TEDT_OnShowPasswdChar(TWND wnd, TINT show);
 TVOID _TEDT_OnSetDecWidth(TWND wnd, TINT width);
 TLONG _TEDT_ValidateNumberStyle(TWND wnd, TEDIT edit, TLONG ch);
@@ -71,11 +71,11 @@ TLONG EDITBOXPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 
 TLONG _TEDT_AddDecimalFormat(TEDIT edit)
 {
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   TINT cnt = 1;
-  TTCHAR* pbuf;
+  TUI_CHAR* pbuf;
   TLONG len = strlen(edit->editbuf) - 1;
-  TTCHAR* psz = &edit->editbuf[len];
+  TUI_CHAR* psz = &edit->editbuf[len];
   
   memset(buf, 0, sizeof(buf));
   pbuf = buf;
@@ -127,9 +127,9 @@ TLONG _TEDT_AddDecimalFormat(TEDIT edit)
 
 TLONG _TEDT_RemoveDecimalFormat(TEDIT edit)
 {
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
-  TTCHAR* psz = edit->editbuf;
-  TTCHAR* pbuf = buf;
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR* psz = edit->editbuf;
+  TUI_CHAR* pbuf = buf;
   
   if (strchr(edit->editbuf, ','))
   {
@@ -159,7 +159,7 @@ TLONG _TEDT_AddSuffix(TEDIT edit, TINT cols)
 {
   TDOUBLE dbl = atof(edit->editbuf);
   TLONG len = strlen(edit->editbuf);
-  TTCHAR suffix[3] = { ' ', 0, 0 };
+  TUI_CHAR suffix[3] = { ' ', 0, 0 };
   TINT cnt = 0;
 
   while (len > 0)
@@ -238,7 +238,7 @@ TLONG _TEDT_AddSuffix(TEDIT edit, TINT cols)
 TLONG _TEDT_RemoveSuffix(TEDIT edit)
 {
   TDOUBLE dbl = atof(edit->editbuf);
-  TTCHAR suffix = edit->editbuf[strlen(edit->editbuf) - 1];
+  TUI_CHAR suffix = edit->editbuf[strlen(edit->editbuf) - 1];
   switch (suffix)
   {
     case 'K':
@@ -348,7 +348,7 @@ TLONG _TEDT_OnKillFocus(TWND wnd)
   TEDIT edit = 0;
   TNMHDR nmhdr;
   TLONG rc = TUI_CONTINUE;
-  TTCHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
   TDOUBLE decimal = 0.0;
   TDWORD style = TuiGetWndStyle(wnd);
   TLONG rcminmax = TUI_CONTINUE;
@@ -461,7 +461,7 @@ TLONG _TEDT_ValidateNumberStyle(TWND wnd, TEDIT edit, TLONG ch)
 TLONG _TEDT_ValidateDecimalStyle(TWND wnd, TEDIT edit, TLONG ch)
 {
   TLONG rc = TUI_CONTINUE;
-  TTCHAR* decimal = strchr(edit->editbuf, '.');
+  TUI_CHAR* decimal = strchr(edit->editbuf, '.');
   TLONG len = strlen(edit->editbuf);
   
   /* not allowed '-' in the string */
@@ -524,12 +524,12 @@ TVOID _TEDT_OnChar(TWND wnd, TLONG ch)
   TINT changed = 0;
   TDC dc = TuiGetDC(wnd);
   TLONG len = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   TDWORD attrs = TuiGetWndTextAttrs(wnd);
-  TTCHAR text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   TDWORD style = TuiGetWndStyle(wnd);
   TRECT rc;
-  TTCHAR* psz;
+  TUI_CHAR* psz;
   TLONG  ret = TUI_CONTINUE;
   TNMHDR nmhdr;
   
@@ -775,8 +775,8 @@ TVOID _TEDT_OnPaint(TWND wnd, TDC dc)
 {
   TEDIT edit = 0;
   TLONG len = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
-  TTCHAR text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   TDWORD attrs = TuiGetWndTextAttrs(wnd);
   TRECT rc;
   TDWORD style = TuiGetWndStyle(wnd);
@@ -816,7 +816,7 @@ TVOID _TEDT_OnPaint(TWND wnd, TDC dc)
       return;
     }
     
-    len = MIN(strlen(edit->editbuf), rc.cols);
+    len = TUI_MIN(strlen(edit->editbuf), rc.cols);
     memset(buf, 0, TUI_MAX_WNDTEXT);
     memcpy(buf, &edit->editbuf[edit->firstchar], len);
     
@@ -843,7 +843,7 @@ TVOID _TEDT_OnPaint(TWND wnd, TDC dc)
 TVOID _TEDT_OnLimitText(TWND wnd, TINT limit)
 {
   TEDIT edit = 0;
-  TTCHAR text[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT + 1];
   
   if (limit > 0 || limit <= TUI_MAX_WNDTEXT)
   {
@@ -860,7 +860,7 @@ TVOID _TEDT_OnLimitText(TWND wnd, TINT limit)
   }
 }
 
-TVOID _TEDT_OnSetPasswdChar(TWND wnd, TTCHAR passchar)
+TVOID _TEDT_OnSetPasswdChar(TWND wnd, TUI_CHAR passchar)
 {
   TEDIT edit = 0;
   
@@ -987,7 +987,7 @@ TLONG EDITBOXPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
     }
     case TEM_SETPASSWDCHAR:
     {
-      _TEDT_OnSetPasswdChar(wnd, (TTCHAR)wparam);
+      _TEDT_OnSetPasswdChar(wnd, (TUI_CHAR)wparam);
       return 0;
     }
     case TEM_SETDECWIDTH:

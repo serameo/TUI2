@@ -26,7 +26,7 @@ TLONG TuiPutChar(
   TDC dc,
   TINT y,
   TINT x,
-  TTCHAR   ch,
+  TUI_CHAR   ch,
   TDWORD  attrs)
 {
 #if defined __USE_CURSES__
@@ -116,7 +116,7 @@ TLONG TuiGetYX(TDC dc, TINT* y, TINT* x)
 
 TLONG TuiDrawFrame(TDC dc, TRECT* rcframe, TLPCSTR caption, TDWORD attrs)
 {
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   
   TuiDrawBorder(dc, rcframe);
   if (caption)

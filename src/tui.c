@@ -74,12 +74,14 @@ struct _TUIENVSTRUCT
   /* last dialog returned message */
   TINT              themeid;
   ttheme_t          themes[THEME_LAST];
+  /* accelerator */
+  TUI_ACCEL*        accel;
 };
 
 struct _TUIWINDOWSTRUCT
 {
   TLPCSTR             clsname;
-  TTCHAR              wndname[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR            wndname[TUI_MAX_WNDTEXT+1];
   TDWORD              style;
   TDWORD              exstyle;
   TINT                x;
@@ -93,7 +95,7 @@ struct _TUIWINDOWSTRUCT
   TLONG               enable;
   TLONG               visible;
   VALIDATEPROC        validateproc;
-  TTCHAR              infotext[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR              infotext[TUI_MAX_WNDTEXT+1];
   /* curses lib */
 #ifdef __USE_CURSES__
   WINDOW*           win;
@@ -120,192 +122,192 @@ struct _TUIWINDOWSTRUCT
 
 tthemeitem_t STANDARD_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLACK_CYAN   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t LHS_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t ASP_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t CNS_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t KTZ_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t YUANTA_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t KSS_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t PST_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t MBKET_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t AIRA_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t ASL_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
 
 tthemeitem_t MERCHANT_THEME[] =
 {
-  { WHITE_BLACK }, /* COLOR_WNDTEXT     */
-  { BLACK_CYAN  }, /* COLOR_BTNENABLED  */
-  { WHITE_BLACK }, /* COLOR_BTNDISABLED */
-  { BLACK_WHITE }, /* COLOR_BTNFOCUSED  */
-  { BLUE_YELLOW }, /* COLOR_HDRTEXT     */
-  { CYAN_BLACK  }, /* COLOR_EDTTEXT     */
-  { YELLOW_BLUE }, /* COLOR_LBXTEXT     */
-  { WHITE_BLUE  }, /* COLOR_WNDTITLE    */
-  { BLUE_YELLOW }, /* COLOR_HIGHLIGHTED */
-  { WHITE_BLACK }, /* COLOR_DISABLED    */
+  { WHITE_BLACK  }, /* COLOR_WNDTEXT     */
+  { BLACK_CYAN   }, /* COLOR_BTNENABLED  */
+  { WHITE_BLACK  }, /* COLOR_BTNDISABLED */
+  { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
+  { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
+  { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
+  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
+  { BLUE_BLACK   }, /* COLOR_HIGHLIGHTED */
+  { WHITE_BLACK  }, /* COLOR_DISABLED    */
   /* last color */
   { 0 }  
 };
@@ -371,13 +373,13 @@ TLONG TREECTRLPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 
 TINT   TuiGetTheme()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   return env->themeid;
 }
 
 TINT   TuiSetTheme(TINT themeid)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TINT oldtheme = env->themeid;
   if (themeid >= THEME_STANDARD && themeid < THEME_LAST)
   {
@@ -388,7 +390,7 @@ TINT   TuiSetTheme(TINT themeid)
 
 TVOID _TuiInitThemes()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   env->themes[THEME_STANDARD].theme = STANDARD_THEME;
   env->themes[THEME_LHS].theme      = &LHS_THEME[0];
   env->themes[THEME_ASP].theme      = &ASP_THEME[0];
@@ -442,11 +444,11 @@ TVOID _TuiClearScreen(TDC dc)
 #if defined __USE_WIN32__
 
     COORD coordScreen = { 0, 0 };    /* home for the cursor */
-    TDWORD cTTCHARsWritten;
+    TDWORD cbBytesWritten;
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     TDWORD dwConSize;
 
-    /*Get the number of TTCHARacter cells in the current buffer. */
+    /*Get the number of character cells in the current buffer. */
 
     if( !GetConsoleScreenBufferInfo( dc->wout, &csbi ))
     {
@@ -458,10 +460,10 @@ TVOID _TuiClearScreen(TDC dc)
     /* Fill the entire screen with blanks.*/
 
     if (!FillConsoleOutputCharacter(dc->wout,        /* Handle to console screen buffer */
-        (TTCHAR) ' ',      /* TTCHARacter to write to the buffer */
+        (TUI_CHAR) ' ',      /* character to write to the buffer */
         dwConSize,       /* Number of cells to write */
         coordScreen,     /* Coordinates of first cell */
-        &cTTCHARsWritten ))/* Receive number of TTCHARacters written */
+        &cbBytesWritten ))/* Receive number of characters written */
     {
         return;
     }
@@ -476,10 +478,10 @@ TVOID _TuiClearScreen(TDC dc)
     /* Set the buffer's attributes accordingly. */
 
     if (!FillConsoleOutputAttribute(dc->wout,         /* Handle to console screen buffer */
-        csbi.wAttributes, /* TTCHARacter attributes to use */
+        csbi.wAttributes, /* character attributes to use */
         dwConSize,        /* Number of cells to set attribute */
         coordScreen,      /* Coordinates of first cell */
-        &cTTCHARsWritten )) /* Receive number of TTCHARacters written */
+        &cbBytesWritten )) /* Receive number of characters written */
     {
         return;
     }
@@ -631,13 +633,13 @@ TLONG TuiStartup()
     memset(env, 0, sizeof(_TENV));
 
     /* register standard controls */
-    TuiRegisterCls(TSTATIC,   STATICPROC);
-    TuiRegisterCls(TEDITBOX,  EDITBOXPROC);
-    TuiRegisterCls(TLISTBOX,  LISTBOXPROC);
-    TuiRegisterCls(TBUTTON,   BUTTONPROC);
-    TuiRegisterCls(TLISTCTRL, LISTCTRLPROC);
+    TuiRegisterCls(TSTATIC,       STATICPROC);
+    TuiRegisterCls(TEDITBOX,      EDITBOXPROC);
+    TuiRegisterCls(TLISTBOX,      LISTBOXPROC);
+    TuiRegisterCls(TBUTTON,       BUTTONPROC);
+    TuiRegisterCls(TLISTCTRL,     LISTCTRLPROC);
+    TuiRegisterCls(TTREECTRL,     TREECTRLPROC);
     TuiRegisterCls(TLISTPAGECTRL, LISTPAGECTRLPROC);
-    TuiRegisterCls(TTREECTRL, TREECTRLPROC);
 
     env->themeid = THEME_STANDARD;
     /* device context */
@@ -696,7 +698,7 @@ TVOID TuiShutdown()
 
 twndproc_t* _TuiFindWndProc(TLPCSTR clsname)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   twndproc_t* proc = env->firstproc;
   while (proc)
   {
@@ -716,7 +718,7 @@ TENV TuiGetEnv()
 
 TLONG TuiSetPrevMove(TLONG prevmove)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TLONG oldmove = env->prevmove;
   env->prevmove = prevmove;
   return oldmove;
@@ -724,7 +726,7 @@ TLONG TuiSetPrevMove(TLONG prevmove)
 
 TLONG TuiSetNextMove(TLONG nextmove)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TLONG oldmove = env->nextmove;
   env->nextmove = nextmove;
   return oldmove;
@@ -750,7 +752,7 @@ TDC TuiGetDC(TWND wnd)
   }
   else
   {
-      dc = genvptr->dc;
+      dc = TuiGetEnv()->dc;
   }
 #endif
   return (TDC)&dc;
@@ -758,7 +760,7 @@ TDC TuiGetDC(TWND wnd)
 
 TLONG TuiRegisterCls(TLPCSTR clsname, TWNDPROC wndproc)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   twndproc_t* proc = _TuiFindWndProc(clsname);
 
   if (!proc)
@@ -808,7 +810,7 @@ TWND _TuiCreateWndEx(
   TLPVOID   param
 )
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TWND wnd = 0;
   TLONG len = 0;
   twndproc_t* proc = _TuiFindWndProc(clsname);
@@ -868,10 +870,10 @@ TWND _TuiCreateWndEx(
       
       /* curses */
 #ifdef __USE_CURSES__
-      wnd->win     = stdscr;
+      wnd->win  = stdscr;
 #elif defined __USE_WIN32__
-      wnd->win = genvptr->dc.win;
-      wnd->wout = genvptr->dc.wout;
+      wnd->win  = env->dc.win;
+      wnd->wout = env->dc.wout;
 #endif
       wnd->attrs   = 0;
 
@@ -948,7 +950,7 @@ TWND _TuiCreateWnd(
   TLPVOID   param
 )
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TWND wnd = 0;
   TLONG len = 0;
   twndproc_t* proc = _TuiFindWndProc(clsname);
@@ -993,10 +995,10 @@ TWND _TuiCreateWnd(
       wnd->validateproc = 0;
       /* curses */
 #ifdef __USE_CURSES__
-      wnd->win     = stdscr;
+      wnd->win  = stdscr;
 #elif defined __USE_WIN32__
-      wnd->win = genvptr->dc.win;
-      wnd->wout = genvptr->dc.wout;
+      wnd->win  = env->dc.win;
+      wnd->wout = env->dc.wout;
 #endif
       wnd->attrs   = 0;
 
@@ -1592,7 +1594,7 @@ TVOID _TuiDestroyWnd(TWND wnd)
 
 TVOID TuiDestroyWnd(TWND wnd)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   /* remove the link if it is TWS_WINDOW */
   if (wnd && (wnd->style & TWS_WINDOW))
   {
@@ -1621,7 +1623,7 @@ TLONG TuiPostMsg(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
     tmsgq_t* msgq = (tmsgq_t*)malloc(sizeof(tmsgq_t));
     if (msgq)
     {
-      TENV env = genvptr;
+      TENV env = TuiGetEnv();
 
       memset(msgq, 0, sizeof(tmsgq_t));
       msgq->wnd = wnd;
@@ -1703,6 +1705,9 @@ TLONG TuiInvalidateWnd(TWND wnd)
   {
     TuiSetFocus(activechild);
     TuiMoveYX(TuiGetDC(activechild), activechild->y, activechild->x);
+    /* finally, paint the active window */
+    TuiPostMsg(activechild, TWM_ERASEBK, (TWPARAM)TuiGetDC(wnd), 0);
+    TuiPostMsg(activechild, TWM_PAINT, 0, 0);
   }
   return rc;
 }
@@ -1998,10 +2003,11 @@ TLONG  TuiGetChar()
     DWORD cNumRead, i;
     INPUT_RECORD irInBuf[128];
     TINT bDone = 0;
+    TENV env = TuiGetEnv();
     while (!bDone)
     {
         ReadConsoleInput(
-            genvptr->dc.win,      // input buffer handle 
+            env->dc.win,      // input buffer handle 
             irInBuf,     // buffer to read into 
             128,         // size of read buffer 
             &cNumRead); // number of records read
@@ -2022,7 +2028,7 @@ TLONG  TuiGetChar()
 
 TLONG TuiGetMsg(TMSG* msg)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   tmsgq_t* msgq = 0;
 
   if (env->quitcode)
@@ -2062,7 +2068,7 @@ TLONG TuiGetMsg(TMSG* msg)
 TLONG _TuiAlignmentPrint(TLPSTR out, TLPCSTR in, TLONG limit, TINT align)
 {
   TLONG len = 0;
-  TTCHAR text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   TINT firstlen = 0;
   TINT lastlen = 0;
   
@@ -2117,7 +2123,7 @@ TLONG _TuiAlignmentPrint(TLPSTR out, TLPCSTR in, TLONG limit, TINT align)
 
 TLONG _TuiRemoveAllMsgs()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   tmsgq_t* msgq = 0;
   /* deque */
   while (env->headq)
@@ -2136,7 +2142,7 @@ TLONG _TuiRemoveAllMsgs()
 
 TLONG _TuiDequeMsg()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   tmsgq_t* msgq = 0;
   /* deque */
   while (env->headq)
@@ -2160,7 +2166,7 @@ TLONG _TuiDequeMsg()
 
 TLONG TuiDispatchMsg(TMSG* msg)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TWND wnd = env->activewnd;
   TWND child = (wnd ? wnd->activechild : 0);
 
@@ -2194,7 +2200,7 @@ TLONG TuiDispatchMsg(TMSG* msg)
 
 TLONG TuiTranslateMsg(TMSG* msg)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TINT  ch  = (TINT)msg->wparam;
   TLONG rc  = 0;
   TWND nextwnd = 0;
@@ -2205,6 +2211,7 @@ TLONG TuiTranslateMsg(TMSG* msg)
   TLONG prevmove = env->prevmove;
   TWND nextchild = 0;
   TRECT rcwnd;
+  TUI_INT  i;
 
   if (env->quitcode)
   {
@@ -2253,7 +2260,7 @@ TLONG TuiTranslateMsg(TMSG* msg)
       return rc;
     }
 
-    /* set focus the new active window */    
+    /* set focus the new active window */
     prevwnd = msg->wnd;
     if (parent)
     {
@@ -2286,7 +2293,7 @@ TLONG TuiTranslateMsg(TMSG* msg)
       rc = TuiPostMsg(msg->wnd, TWM_SETFOCUS, 0, (TLPARAM)prevwnd);
       TuiMoveYX(TuiGetDC(msg->wnd), msg->wnd->y, msg->wnd->x);
     }
-    return 0;    
+    return 0;
   }
   else if (ch == prevmove)
   {
@@ -2335,6 +2342,20 @@ TLONG TuiTranslateMsg(TMSG* msg)
   else
   {
     /* otherwise key */
+    /* check if the pressed key has been loaded into the accelerator table */
+    if (env->accel)
+    {
+      for (i=0; env->accel[i].cmd != 0; ++i)
+      {
+        if (env->accel[i].vkey == ch)
+        {
+          TuiSendMsg(parent,
+            TWM_COMMAND,
+            env->accel[i].cmd, 0);
+          return 0;
+        }
+      }
+    }
   }
 
   /* parent window */
@@ -2357,7 +2378,7 @@ TLONG TuiTranslateMsg(TMSG* msg)
 
 TLONG TuiPostQuitMsg(TLONG exitcode)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   env->quitcode = 1;
   env->exitcode = exitcode;
 
@@ -2371,7 +2392,7 @@ TWND TuiGetFocus(TWND wnd)
 
 TLONG TuiSetFocus(TWND wnd)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   TWND parent = (wnd ? wnd->parent : env->activewnd);
   TWND activewnd = TuiGetActiveChildWnd(wnd);
   TLONG rc = TUI_CONTINUE;
@@ -2400,19 +2421,19 @@ TLONG TuiSetFocus(TWND wnd)
 
 TWND TuiGetActiveWnd()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   return env->activewnd;
 }
 
 TWND TuiGetFirstWnd()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   return env->firstwnd;
 }
 
 TWND TuiGetLastWnd()
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   return env->lastwnd;
 }
 
@@ -2486,7 +2507,7 @@ TLONG  _TuiDefWndProc_OnSetCursor(TWND wnd, TPOS* pos)
 TLONG _TuiDefWndProc_OnEraseBk(TWND wnd, TDC dc)
 {
   TINT i;
-  TTCHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
   TRECT rc;
   TDWORD attrs = TuiGetWndTextAttrs(wnd);
   
@@ -2623,7 +2644,19 @@ TVOID _TuiDefWndProc_OnSetFocus(TWND wnd)
 TLONG  _TuiDefWndProc_OnShow(TWND wnd, TLONG show)
 {
   wnd->visible = show;
-  return TuiInvalidateWnd(wnd);
+  TLONG rc = TuiInvalidateWnd(wnd);
+  TWND activechild = TuiGetActiveChildWnd(wnd);
+  if (!activechild)
+  {
+    activechild = TuiGetFirstActiveChildWnd(wnd);
+  }
+  if (activechild)
+  {
+    /* finally, paint the active window */
+    TuiPostMsg(activechild, TWM_ERASEBK, (TWPARAM)TuiGetDC(wnd), 0);
+    TuiPostMsg(activechild, TWM_PAINT, 0, 0);
+  }
+  return rc;
 }
 
 TLONG  _TuiDefWndProc_OnEnable(TWND wnd, TLONG enable)
@@ -2726,7 +2759,7 @@ TDWORD TuiGetColor(TINT idx)
 
 TDWORD TuiGetSysColor(TINT idx)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   if (idx < 0 || idx >= COLOR_LAST)
   {
     idx = 0;
@@ -2768,7 +2801,7 @@ TDWORD TuiUnderlineText(TDWORD attrs)
 
 TDWORD TuiGetSysColorTheme(TINT themeid, TINT idx)
 {
-  TENV env = genvptr;
+  TENV env = TuiGetEnv();
   if (themeid < 0 || themeid >= THEME_LAST)
   {
     themeid = 0;
@@ -2790,7 +2823,7 @@ TDWORD TuiGetReverseSysColorTheme(TINT themeid, TINT idx)
 #ifdef __USE_CURSES__
   return TuiGetSysColorTheme(themeid, idx)|A_REVERSE;
 #elif defined __USE_WIN32__
-    TENV env = genvptr;
+    TENV env = TuiGetEnv();
     if (themeid < 0 || themeid >= THEME_LAST)
     {
         themeid = 0;
@@ -2799,7 +2832,17 @@ TDWORD TuiGetReverseSysColorTheme(TINT themeid, TINT idx)
     {
         idx = 0;
     }
-    return _TuiReverseColorPair(genvptr->themes[genvptr->themeid].theme[idx].id);
+    return _TuiReverseColorPair(env->themes[env->themeid].theme[idx].id);
 #endif
+  return 0;
+}
+
+TUI_LONG TuiLoadAccel(TUI_ACCEL* accel)
+{
+  TENV env = TuiGetEnv();
+  if (accel)
+  {
+    env->accel = accel;
+  }
   return 0;
 }

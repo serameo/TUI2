@@ -19,7 +19,7 @@
 
 struct _TLISTBOXITEMSTRUCT
 {
-  TTCHAR     itemtext[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR     itemtext[TUI_MAX_WNDTEXT+1];
   TLPVOID    data;
   TINT       checked;
   struct _TLISTBOXITEMSTRUCT *prev;
@@ -49,7 +49,6 @@ typedef struct _TUILISTBOXSTRUCT *PTLISTBOX;
 
 tlistbox_t* _TLB_FindItemByIndex(TWND wnd, TINT idx);
 TVOID   _TLB_OnSelChanged(TWND wnd);
-
 TINT    _TLB_OnCountItemCheck(TWND wnd);
 TINT    _TLB_OnGetItemChecked(TWND wnd, TINT idx);
 TINT    _TLB_OnSetItemChecked(TWND wnd, TINT idx, TINT check);
@@ -273,9 +272,10 @@ TVOID _TLB_OnKeyDown(TWND wnd, TLONG ch)
       }
     }
     
-    TuiInvalidateWnd(wnd);
     /* send notification */
     _TLB_OnSelChanged(wnd);
+    /* redraw after changing */
+    TuiInvalidateWnd(TuiGetParent(wnd));
   }
   lb->selitem = _TLB_FindItemByIndex(wnd, lb->cursel);
   lb->firstvisibleitem = _TLB_FindItemByIndex(wnd, lb->firstvisible);
@@ -286,14 +286,17 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
   PTLISTBOX lb = 0;
   TINT i = 0;
   tlistbox_t* item = 0;
-  TTCHAR  buf[TUI_MAX_WNDTEXT+1];
-  TTCHAR  text[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR  buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR  text[TUI_MAX_WNDTEXT+1];
   TDWORD  attrs = TuiGetWndTextAttrs(wnd);
   TDRAWITEM di;
   TRECT rc;
   TDWORD style = TuiGetWndStyle(wnd);
   TINT lines = 0;
   TINT y, x; /* to move cursor */
+  TINT ysel, xsel;
+  TUI_CHAR  bufsel[TUI_MAX_WNDTEXT+1];
+  TDWORD attrssel;
   
   if (!TuiIsWndVisible(wnd))
   {
@@ -360,11 +363,13 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
           
           if (i == lb->cursel)
           {
-            y = rc.y + (i - lb->firstvisible);
-            x = rc.x;
+            ysel = y = rc.y + (i - lb->firstvisible);
+            xsel = x = rc.x;
+            strcpy(bufsel, buf);
 #if defined __USE_CURSES__
             if (attrs)
             {
+              attrssel = TuiReverseColor(attrs);
               TuiDrawText(dc, 
                 rc.y+(i-lb->firstvisible), 
                 rc.x, 
@@ -373,6 +378,7 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
             }
             else
             {
+              attrssel = TuiGetSysColor(COLOR_HIGHLIGHTED);
               TuiDrawText(dc,
                   rc.y + (i - lb->firstvisible),
                   rc.x,
@@ -380,6 +386,7 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
                   TuiGetSysColor(COLOR_HIGHLIGHTED));
             }
 #elif defined __USE_WIN32__
+            attrssel = TuiGetSysColor(COLOR_HIGHLIGHTED);
             TuiDrawText(dc,
                 rc.y + (i - lb->firstvisible),
                 rc.x,
@@ -407,7 +414,7 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
                 TuiGetSysColor(COLOR_LBXTEXT));
             }
 #elif defined __USE_WIN32__
-              TuiDrawText(dc,
+            TuiDrawText(dc,
                   rc.y + (i - lb->firstvisible),
                   rc.x,
                   buf,
@@ -417,6 +424,12 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
         }
       }/* not owner draw */
     } /* for each item */
+    /*draw the selected item */
+    TuiDrawText(dc, 
+      ysel,
+      xsel,
+      bufsel,
+      attrssel);
     TuiMoveYX(dc, y, x);
   } /* items are valid */
 }
@@ -579,9 +592,10 @@ TVOID _TLB_OnSetCurSel(TWND wnd, TINT idx)
     lb->firstvisible = 0;
   }
   
-  TuiInvalidateWnd(wnd);
   /* send notification */
   _TLB_OnSelChanged(wnd);
+  /* redraw after changing */
+  TuiInvalidateWnd(wnd);
 
   lb->selitem = _TLB_FindItemByIndex(wnd, lb->cursel);
   lb->firstvisibleitem = _TLB_FindItemByIndex(wnd, lb->firstvisible);

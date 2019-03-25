@@ -22,7 +22,7 @@ struct _TLISTCELLSTRUCT
   TINT         x;
   TINT         lines;
   TINT         cols;
-  TTCHAR       caption[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR       caption[TUI_MAX_WNDTEXT+1];
   TDWORD       attrs;
   TVOID*       data;
   TDWORD       editstyle;
@@ -35,7 +35,7 @@ typedef struct _TLISTCELLSTRUCT tlistcell_t;
 struct _THEADERSTRUCT
 {
   TINT             id;
-  TTCHAR           caption[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR           caption[TUI_MAX_WNDTEXT+1];
   TINT             cols;      /* width */  
   TINT             align;     /* left is a default */
   TDWORD           attrs;
@@ -336,7 +336,7 @@ TLONG _TLC_OnAddColumn(TWND wnd, THEADERITEM* hdritem)
   TuiGetWndRect(TuiGetParent(wnd), &rc);
   strncpy(header->caption,
     hdritem->caption,
-    MIN(TUI_MAX_WNDTEXT, strlen(hdritem->caption)));
+    TUI_MIN(TUI_MAX_WNDTEXT, strlen(hdritem->caption)));
   header->cols    = hdritem->cols;
   header->align   = hdritem->align;
   header->attrs   = hdritem->attrs;
@@ -478,9 +478,9 @@ TLONG _TLC_OnAddItem(TWND wnd, TLPSTR text, TINT nitems)
 {
   PTLISTCTRL lctl = 0;
   TINT i = 0;
-  TTCHAR* tok;
+  TUI_CHAR* tok;
   theader_t* header = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   tlistcell_t* newcell = 0;
 
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
@@ -501,7 +501,7 @@ TLONG _TLC_OnAddItem(TWND wnd, TLPSTR text, TINT nitems)
       memset(newcell, 0, sizeof(tlistcell_t));
       if (tok)
       {
-        strncpy(newcell->caption, tok, MIN(TUI_MAX_WNDTEXT, strlen(tok)));
+        strncpy(newcell->caption, tok, TUI_MIN(TUI_MAX_WNDTEXT, strlen(tok)));
       }
       else
       {
@@ -537,7 +537,7 @@ TVOID _TLC_DrawItem(
   TDC dc, TRECT* rccell, TLPCSTR caption, TDWORD attrs, TINT align, TINT isheader)
 {
   TLONG len = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   len = TuiPrintTextAlignment(buf, 
           caption,
           rccell->cols,
@@ -931,7 +931,7 @@ TVOID _TLC_OnBeginEdit(TWND wnd)
   TNMHDR nmhdr;
   PTLISTCTRL lctl = 0;
   TRECT rccell;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   TDWORD editstyle = 0;
   
   if (!(TuiGetWndStyle(wnd) & TLCS_EDITABLE))
@@ -985,7 +985,7 @@ TVOID _TLC_OnEndEdit(TWND wnd, TINT ok)
 {
   TNMHDR nmhdr;
   PTLISTCTRL lctl = 0;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   TINT rc = TUI_CONTINUE;
   
   if (!(TuiGetWndStyle(wnd) & TLCS_EDITABLE))

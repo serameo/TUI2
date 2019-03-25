@@ -59,7 +59,7 @@ TVOID _TTC_OnCollapseAllItems(TWND wnd);
 
 TVOID _TTC_FreshView(TWND wnd);
 TLONG _TTC_DefFindItemProc(const TVOID* datap, const TVOID* itemp);
-TVOID _TTC_GetDisplayText(TWND wnd, TTCHAR* buf, TTREEITEM* item, TINT maxlen, TBOOL file);
+TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* buf, TTREEITEM* item, TINT maxlen, TBOOL file);
 
 TVOID _TTC_AdjustVisibleItems(TWND wnd);
 TTREEITEM* _TTC_MoveNext(TWND wnd, TLONG times);
@@ -87,14 +87,14 @@ TLONG _TTC_DefFindItemProc(const TVOID* datap, const TVOID* itemp)
 
 TLONG _TTC_OnImportFromFile(TWND wnd, FILE* fp, LPTREEIMPORTPROC proc)
 {
-  TTCHAR buf[BUFSIZ+1];
+  TUI_CHAR buf[BUFSIZ+1];
   TTREECTRLSTRUCT* tc  = 0;
   TTREEITEMDATA data;
   TTREEVIEWITEM view;
   stack_t* stack = 0;
   TTREEITEM* parent = 0;
   TINT tabs = 0;
-  TTCHAR* psz = 0;
+  TUI_CHAR* psz = 0;
   TINT items = 0;
   TTREEITEM* newitem = 0;
   TINT len = 0;
@@ -214,7 +214,7 @@ TLONG _TTC_OnImportFromFile(TWND wnd, FILE* fp, LPTREEIMPORTPROC proc)
 TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc)
 {
   queue_t* queue = 0;
-  TTCHAR buf[BUFSIZ+1];
+  TUI_CHAR buf[BUFSIZ+1];
   TTREECTRLSTRUCT* tc  = 0;
   TTREEITEMDATA data;
   TTREEVIEWITEM view;
@@ -995,7 +995,7 @@ TLONG _TTC_OnCreate(TWND wnd)
   return TUI_CONTINUE;
 }
 
-TVOID _TTC_GetDisplayText(TWND wnd, TTCHAR* buf, TTREEITEM* item, TINT maxlen, TBOOL file)
+TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* buf, TTREEITEM* item, TINT maxlen, TBOOL file)
 {
   TINT xpos = 0;
   TTREEITEMDATA data;
@@ -1082,7 +1082,7 @@ long _TTC_PreorderTraverseProc(void* args, TTREEITEM* item, const void* node, un
 TVOID _TTC_OnPaint(TWND wnd, TDC dc)
 {
   TRECT rc;
-  TTCHAR buf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR buf[TUI_MAX_WNDTEXT+1];
   TLONG  displayableitems = 0;
   TTREECTRLSTRUCT* tc  = 0;
   TINT y = 0;
@@ -1092,6 +1092,9 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
   TDWORD highlight = TuiGetSysColor(COLOR_HIGHLIGHTED);
   TDWORD normal = TuiGetSysColor(COLOR_WNDTEXT);
   TINT count = 0, items = 0;
+  TINT ysel = 0;
+  TINT xsel = 0;
+  TUI_CHAR bufsel[TUI_MAX_WNDTEXT+1];
   
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
 
@@ -1128,6 +1131,9 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
       if (data.selected)
       {
         TuiDrawText(dc, y, rc.x, buf, highlight);
+        ysel = y;
+        xsel = rc.x;
+        strcpy(bufsel, buf);
       }
       else
       {
@@ -1148,6 +1154,10 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
     }
     tc->visibleitems->GetItemData(iter, &view, sizeof(view));
     tc->lastvisibleitem = view.item;
+    
+    /* draw the selected item */
+    TuiDrawText(dc, ysel, xsel, bufsel, highlight);
+    TuiMoveYX(dc, ysel, xsel);
   }
 }
 
