@@ -102,10 +102,8 @@ typedef const char*         TLPCSTR;
 typedef char*               TLPSTR;
 typedef char                TTCHAR;
 typedef double              TDOUBLE;
-  
 typedef unsigned long       TDWORD;
 typedef unsigned int        TUINT;
-  
 typedef char                TINT8;
 typedef unsigned char       TUINT8;
 typedef short               TINT16;
@@ -114,9 +112,29 @@ typedef int                 TINT32;
 typedef unsigned int        TUINT32;
 typedef long long           TINT64;
 typedef unsigned long long  TUINT64;
-
 typedef TINT32              TBOOL;
 
+typedef long                TUI_WPARAM;
+typedef long                TUI_LPARAM;
+typedef long                TUI_LONG;
+typedef int                 TUI_INT;
+typedef void                TUI_VOID;
+typedef void*               TUI_LPVOID;
+typedef const char*         TUI_LPCSTR;
+typedef char*               TUI_LPSTR;
+typedef char                TUI_CHAR;
+typedef double              TUI_DOUBLE;
+typedef unsigned long       TUI_DWORD;
+typedef unsigned int        TUI_UINT;
+typedef char                TUI_INT8;
+typedef unsigned char       TUI_UINT8;
+typedef short               TUI_INT16;
+typedef unsigned short      TUI_UINT16;
+typedef int                 TUI_INT32;
+typedef unsigned int        TUI_UINT32;
+typedef long long           TUI_INT64;
+typedef unsigned long long  TUI_UINT64;
+typedef TUI_INT32           TUI_BOOL;
 
 #define TUI_TRUE            (TBOOL)1
 #define TUI_FALSE           (TBOOL)0
@@ -144,6 +162,15 @@ typedef TLONG (*VALIDATEPROC)(TWND, TLPCSTR);
 struct _TUIENVSTRUCT;
 typedef struct _TUIENVSTRUCT _TENV;
 typedef struct _TUIENVSTRUCT *TENV;
+
+/* accelerator */
+struct _TUIACCELSTRUCT
+{
+  TUI_INT       vkey;
+  TUI_UINT      cmd;
+};
+typedef struct _TUIACCELSTRUCT _TUI_ACCEL;
+typedef struct _TUIACCELSTRUCT TUI_ACCEL;
 
 /* message structure */
 struct _TMSGSTRUCT
@@ -975,6 +1002,11 @@ TLONG TuiSetNextMove(TLONG nextmove);
  */
 TLONG TuiSetPrevMove(TLONG prevmove);
 /*
+ * TuiLoadAccel()
+ *   Load accelerator table into the TUI environment
+ */
+TUI_LONG TuiLoadAccel(TUI_ACCEL* accel);
+/*
  * TuiGetSysColor()
  *   Get system color
  *   see also, COLOR_XXX
@@ -1493,35 +1525,10 @@ SHOWINFOPROC   TuiSetWndShowInfoProc(TWND wnd, SHOWINFOPROC showinfoproc);
 #define TDT_CENTER            0x0002
 #define TDT_RIGHT             0x0003
 
-
-#ifdef __USE_QIO__
-/* I/O status block */
-struct _TIOSBSTRUCT
-{
-  TUINT16 status;
-  TUINT16 offset;
-  TUINT16 keycode;
-  TUINT16 size;
-};
-typedef struct _TIOSBSTRUCT TIOSB;
-
-struct _TQIOSTRUCT
-{
-  TIOSB       ttiosb;
-  TUINT16      ttchan;
-};
-typedef struct _TQIOSTRUCT _TQIO;
-typedef struct _TQIOSTRUCT *TQIO;
-
-#endif /*__USE_QIO__*/
-
 struct _TUIDEVICECONTEXSTRUCT
 {
 #ifdef __USE_CURSES__
   WINDOW*     win;
-#elif defined __USE_QIO__
-  /* QIO for VMS implement here */
-  _TQIO*      win;
 #elif defined __USE_WIN32__
   TVOID*      win;
   TVOID*      wout;
@@ -1589,13 +1596,6 @@ TLONG TuiDrawVLine(TDC dc, TINT y, TINT x, TINT nchars, TDWORD attrs);
  *   Draw multiple borders of rectangle without caption
  */
 TLONG TuiDrawMultipleFrames(TDC dc, TRECT* rcframe, TLPCSTR caption, TDWORD attrs, TINT* widths);
-/* simple macros */
-#define MIN(a, b)    ((a) < (b) ? (a) : (b))
-#define MAX(a, b)    ((a) > (b) ? (a) : (b))
-
-#ifdef __VMS__
-TINT sprTINTf(char *str, const char *format, ...);
-#endif
 
 #ifdef __cplusplus
 }
