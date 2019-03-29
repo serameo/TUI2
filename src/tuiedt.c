@@ -19,15 +19,15 @@
 
 struct _TEDITSTRUCT
 {
-  TUI_CHAR            editbuf[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR          editbuf[TUI_MAX_WNDTEXT+1];
   TINT              firstvisit;
-  TUI_CHAR            passchar;
+  TUI_CHAR          passchar;
   TINT              showpass;
   TINT              firstchar;
   TINT              limitchars;
   TINT              editing;
   TINT              decwidth;
-  TUI_CHAR            validstr[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR          validstr[TUI_MAX_WNDTEXT+1];
   TINT              min;
   TINT              max;
   TINT              onminmax;
@@ -762,6 +762,32 @@ TVOID _TEDT_OnChar(TWND wnd, TLONG ch)
     /* editing */      
     edit->editing    = 1;
   }
+  /* moving key pressed */
+  else if (TES_NOTIFYKEYPRESSED & style)
+  {
+    switch (ch)
+    {
+      case TVK_LEFT:
+      case TVK_RIGHT:
+      case TVK_UP:
+      case TVK_DOWN:
+      case TVK_NEXT:
+      case TVK_PRIOR:
+      case TVK_ENTER:
+      case TVK_INSERT:
+      case TVK_DELETE:
+      case TVK_END:
+      case TVK_HOME:
+      {
+        TNMHDRKEYPRESSEDSTRUCT keyhdr;
+        keyhdr.hdr.id   = TuiGetWndID(wnd);
+        keyhdr.hdr.ctl  = wnd;
+        keyhdr.hdr.code = TEN_KEYPRESSED;
+        keyhdr.vkey     = ch;
+        TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&keyhdr);
+      }
+    }
+  }
   if (changed)
   {
     nmhdr.id   = TuiGetWndID(wnd);
@@ -782,16 +808,17 @@ TVOID _TEDT_OnPaint(TWND wnd, TDC dc)
   TDWORD style = TuiGetWndStyle(wnd);
   
   edit = (TEDIT)TuiGetWndParam(wnd);
-  if (TuiIsWndEnabled(wnd))
-  {
-    if (style & TES_UNDERLINE)
-    {
-      attrs = TuiUnderlineText(attrs);
-    }
-  }
   
   if (TuiIsWndVisible(wnd))
   {
+    if (TuiIsWndEnabled(wnd))
+    {
+      if (style & TES_UNDERLINE)
+      {
+        attrs = TuiUnderlineText(attrs);
+      }
+    }
+    
     TuiGetWndRect(wnd, &rc);
     len = rc.cols;
     if (TES_PASSWORD & style)

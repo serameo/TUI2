@@ -22,9 +22,9 @@ struct _TLISTCELLSTRUCT
   TINT         x;
   TINT         lines;
   TINT         cols;
-  TUI_CHAR       caption[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR     caption[TUI_MAX_WNDTEXT+1];
   TDWORD       attrs;
-  TVOID*       data;
+  TUI_LPARAM   data;
   TDWORD       editstyle;
   
   struct _TLISTCELLSTRUCT *prev;
@@ -34,16 +34,16 @@ typedef struct _TLISTCELLSTRUCT tlistcell_t;
 
 struct _THEADERSTRUCT
 {
-  TINT             id;
-  TUI_CHAR           caption[TUI_MAX_WNDTEXT+1];
-  TINT             cols;      /* width */  
-  TINT             align;     /* left is a default */
-  TDWORD           attrs;
-  TDWORD           editstyle;
-  TINT             decwidth;
+  TINT              id;
+  TUI_CHAR          caption[TUI_MAX_WNDTEXT+1];
+  TINT              cols;      /* width */  
+  TINT              align;     /* left is a default */
+  TDWORD            attrs;
+  TDWORD            editstyle;
+  TINT              decwidth;
   
-  tlistcell_t*    firstcell;
-  tlistcell_t*    lastcell;
+  tlistcell_t*      firstcell;
+  tlistcell_t*      lastcell;
 
   struct _THEADERSTRUCT *prev;
   struct _THEADERSTRUCT *next;
@@ -53,32 +53,32 @@ typedef struct _THEADERSTRUCT theader_t;
 
 struct _TLISTCTRLSTRUCT
 {
-  theader_t*    firsthdr;
-  theader_t*    lasthdr;
-  theader_t*    firstvisiblehdr;
-  theader_t*    lastvisiblehdr;
+  theader_t*      firsthdr;
+  theader_t*      lasthdr;
+  theader_t*      firstvisiblehdr;
+  theader_t*      lastvisiblehdr;
 
-  TINT           nheaders;
-  TINT           nitems;
-  TINT           hdrids;      /* header id */
-  TINT           hdrallwidths;
+  TINT            nheaders;
+  TINT            nitems;
+  TINT            hdrids;      /* header id */
+  TINT            hdrallwidths;
   /* item control */
-  TINT           curselrow;
-  TINT           curselcol;
-  TINT           firstvisiblerow;
-  
-  TWND           editbox;
-  TINT           state;
-  tlistcell_t*   editingcell;
-  
-  TVOID*         exparam;
+  TINT            curselrow;
+  TINT            curselcol;
+  TINT            firstvisiblerow;
+
+  TWND            editbox;
+  TINT            state;
+  tlistcell_t*    editingcell;
+
+  TUI_LPARAM      exparam;
 };
 typedef struct _TLISTCTRLSTRUCT _TLISTCTRL;
 typedef struct _TLISTCTRLSTRUCT *PTLISTCTRL;
 
-theader_t*   _TLC_FindHeaderByIndex(PTLISTCTRL lctl, TINT col);
-tlistcell_t* _TLC_FindCellByIndex(PTLISTCTRL lctl, TINT col, TINT idx);
-tlistcell_t* _TLC_FindCellByHeader(PTLISTCTRL lctl, theader_t* header, TINT idx);
+theader_t*    _TLC_FindHeaderByIndex(PTLISTCTRL lctl, TINT col);
+tlistcell_t*  _TLC_FindCellByIndex(PTLISTCTRL lctl, TINT col, TINT idx);
+tlistcell_t*  _TLC_FindCellByHeader(PTLISTCTRL lctl, theader_t* header, TINT idx);
 TLONG         _TLC_GetCellRect(tlistcell_t* cell, TRECT* rect);
 TINT          _TLC_FindHeaderIndex(PTLISTCTRL lctl, theader_t* header);
 
@@ -1227,6 +1227,20 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
       }
       break;
     }
+    
+    case TVK_ENTER:
+    {
+      TNMHDR nmhdr;
+      /* send notification */
+      nmhdr.id   = TuiGetWndID(wnd);
+      nmhdr.ctl  = wnd;
+      nmhdr.code = TLCN_SELITEM;
+      TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
+    }
+    default:
+    {
+       break;
+    }
   }
   if (repaint)
   {
@@ -1256,9 +1270,10 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
         lctl->firstvisiblerow = 0;
       }
     }
-    TuiInvalidateWnd(wnd);
     /* send notification */
     _TLC_OnSelChanged(wnd);
+    
+    TuiInvalidateWnd(wnd);
   }
 }
 

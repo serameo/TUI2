@@ -78,7 +78,7 @@ stack_push(stack_t* stack, const void* vp, tui_ui32 size)
   {
     return -1;
   }
-  return list->InsertFirst(list, vp, size);
+  return (0 == list->InsertFirst(list, vp, size) ? -1 : 0);
 }
 
 void

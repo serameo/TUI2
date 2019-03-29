@@ -137,6 +137,7 @@ TVOID _TBTN_OnKeyDown(TWND wnd, TLONG ch)
   
   switch (ch)
   {
+    case TVK_ENTER:
     case TVK_SPACE:
       repaint = 1;
       break;
@@ -150,7 +151,8 @@ TVOID _TBTN_OnKeyDown(TWND wnd, TLONG ch)
     TuiInvalidateWnd(wnd);
     
     /* send notification */
-    TuiPostMsg(TuiGetParent(wnd), 
+    TuiPostMsg(
+      TuiGetParent(wnd), 
       TWM_COMMAND,
       (TWPARAM)TuiGetWndID(wnd),
       (TLPARAM)wnd);

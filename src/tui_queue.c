@@ -66,7 +66,7 @@ tui_i32
 queue_enqueue(queue_t* queue, const void* vp, tui_ui32 size)
 {
   list_t* list = ((queue_impl_t*)queue)->list;
-  return list->InsertLast(list, vp, size);
+  return (0 == list->InsertLast(list, vp, size) ? -1 : 0);
 }
 
 void

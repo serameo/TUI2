@@ -58,7 +58,8 @@ TVOID _TTC_OnExpandAllItems(TWND wnd);
 TVOID _TTC_OnCollapseAllItems(TWND wnd);
 
 TVOID _TTC_FreshView(TWND wnd);
-TLONG _TTC_DefFindItemProc(const TVOID* datap, const TVOID* itemp);
+/*typedef tui_i32         (*fn_tree_compare_proc)(const void*, const void*);*/
+tui_i32 _TTC_DefFindItemProc(const void* datap, const void* itemp);
 TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* buf, TTREEITEM* item, TINT maxlen, TBOOL file);
 
 TVOID _TTC_AdjustVisibleItems(TWND wnd);
@@ -70,13 +71,13 @@ struct _TTREEVIEWITEM
   TTREEITEM* item;  
 };
 typedef struct _TTREEVIEWITEM TTREEVIEWITEM;
-
-long _TTC_PreorderTraverseProc(void* args, TTREEITEM* item, const void* node, unsigned long size);
-long _TTC_ExpandAllItemsProc(void* args, TTREEITEM* item, const void* node, unsigned long size);
-long _TTC_CollapseAllItemsProc(void* args, TTREEITEM* item, const void* node, unsigned long size);
+/*typedef tui_i32         (*fn_tree_traverse_proc)(void*, tree_iter_t, const void*, tui_ui32);*/
+tui_i32 _TTC_PreorderTraverseProc(void* args, tree_iter_t item, const void* node, tui_ui32 size);
+tui_i32 _TTC_ExpandAllItemsProc(void* args, tree_iter_t item, const void* node, tui_ui32 size);
+tui_i32 _TTC_CollapseAllItemsProc(void* args, tree_iter_t item, const void* node, tui_ui32 size);
 
 /* helper functions */
-TLONG _TTC_DefFindItemProc(const TVOID* datap, const TVOID* itemp)
+tui_i32 _TTC_DefFindItemProc(const void* datap, const void* itemp)
 {
   /* this function compare the item text */
   TTREEITEMDATA* dataitem = (TTREEITEMDATA*)datap;
@@ -235,8 +236,9 @@ TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc)
   /* populate all items */
   queue = Queue_Create(0);
   root = tc->tree->GetRootItem(tc->tree);
-  tc->tree->Populate(tc->tree, tc->tree->GetFirstChild(root),
-    queue, _TTC_PreorderTraverseProc, TPO_PRE);
+  tc->tree->Populate(tc->tree,
+    tc->tree->GetFirstChild(root),
+    (void*)queue, _TTC_PreorderTraverseProc, TPO_PRE);
   
   /* print all items to file */
   while (!queue->IsEmpty(queue))
@@ -460,7 +462,6 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   list_iter_t iter = 0;
   TTREEVIEWITEM view;
   TLONG i = 0;
-  TINT items = 0;
   TINT firstindex = 0;
   TINT curindex = 0;
   list_iter_t first_iter = 0;
@@ -472,7 +473,6 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   
   TuiGetWndRect(wnd, &rc);
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
-  items = tc->visibleitems->Count(tc->visibleitems);
   
   /* change selection item */
   iter = tc->visibleitems->Begin(tc->visibleitems);
@@ -670,6 +670,20 @@ TVOID _TTC_OnKeyDown(TWND wnd, TLONG ch)
       /* notify select item */
       _TTC_OnSetSelItem(wnd, selitem);
       break;
+    }
+    
+    case TVK_ENTER:
+    {
+      TNMHDR nmhdr;
+      /* send notification */
+      nmhdr.id   = TuiGetWndID(wnd);
+      nmhdr.ctl  = wnd;
+      nmhdr.code = TTCN_SELITEM;
+      TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
+    }
+    default:
+    {
+       break;
     }
   }
 }
@@ -1043,7 +1057,7 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* buf, TTREEITEM* item, TINT maxlen,
   }
 }
 
-long _TTC_ExpandAllItemsProc(void* args, TTREEITEM* item, const void* node, unsigned long size)
+tui_i32 _TTC_ExpandAllItemsProc(void* args, tree_iter_t item, const void* node, tui_ui32 size)
 {
   TTREEITEMDATA data;
   TWND wnd = (TWND)args;
@@ -1056,7 +1070,7 @@ long _TTC_ExpandAllItemsProc(void* args, TTREEITEM* item, const void* node, unsi
   return 0;
 }
 
-long _TTC_CollapseAllItemsProc(void* args, TTREEITEM* item, const void* node, unsigned long size)
+tui_i32 _TTC_CollapseAllItemsProc(void* args, tree_iter_t item, const void* node, tui_ui32 size)
 {
   TTREEITEMDATA data;
   TWND wnd = (TWND)args;
@@ -1069,7 +1083,7 @@ long _TTC_CollapseAllItemsProc(void* args, TTREEITEM* item, const void* node, un
   return 0;
 }
 
-long _TTC_PreorderTraverseProc(void* args, TTREEITEM* item, const void* node, unsigned long size)
+tui_i32 _TTC_PreorderTraverseProc(void* args, tree_iter_t item, const void* node, tui_ui32 size)
 {
   queue_t* queue = (queue_t*)args;
   TTREEVIEWITEM view;

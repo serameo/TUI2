@@ -19,9 +19,9 @@
 
 struct _TLISTBOXITEMSTRUCT
 {
-  TUI_CHAR     itemtext[TUI_MAX_WNDTEXT+1];
-  TLPVOID    data;
-  TINT       checked;
+  TUI_CHAR      itemtext[TUI_MAX_WNDTEXT+1];
+  TUI_LPARAM    data;
+  TINT          checked;
   struct _TLISTBOXITEMSTRUCT *prev;
   struct _TLISTBOXITEMSTRUCT *next;
 };
@@ -52,8 +52,8 @@ TVOID   _TLB_OnSelChanged(TWND wnd);
 TINT    _TLB_OnCountItemCheck(TWND wnd);
 TINT    _TLB_OnGetItemChecked(TWND wnd, TINT idx);
 TINT    _TLB_OnSetItemChecked(TWND wnd, TINT idx, TINT check);
-TLPVOID _TLB_OnGetItemData(TWND wnd, TINT idx);
-TVOID   _TLB_OnSetItemData(TWND wnd, TINT idx, TLPVOID data);
+TUI_LPARAM _TLB_OnGetItemData(TWND wnd, TINT idx);
+TVOID   _TLB_OnSetItemData(TWND wnd, TINT idx, TUI_LPARAM data);
 TVOID   _TLB_OnSetCurSel(TWND wnd, TINT idx);
 TLONG   _TLB_OnGetItemCount(TWND wnd);
 TVOID   _TLB_OnSetItemText(TWND wnd, TINT idx, TLPSTR text);
@@ -241,6 +241,20 @@ TVOID _TLB_OnKeyDown(TWND wnd, TLONG ch)
       lines += rc.lines;
       ++repaint;
       break;
+    }
+    case TVK_ENTER:
+    {
+      /*TLBN_ENTERITEM*/
+      TNMHDR nmhdr;
+      /* send notification */
+      nmhdr.id   = TuiGetWndID(wnd);
+      nmhdr.ctl  = wnd;
+      nmhdr.code = TLBN_SELITEM;
+      TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
+    }
+    default:
+    {
+       break;
     }
   }
   if (repaint)
@@ -601,7 +615,7 @@ TVOID _TLB_OnSetCurSel(TWND wnd, TINT idx)
   lb->firstvisibleitem = _TLB_FindItemByIndex(wnd, lb->firstvisible);
 }
 
-TVOID _TLB_OnSetItemData(TWND wnd, TINT idx, TLPVOID data)
+TVOID _TLB_OnSetItemData(TWND wnd, TINT idx, TUI_LPARAM data)
 {
   tlistbox_t* item = 0;
   
@@ -612,11 +626,11 @@ TVOID _TLB_OnSetItemData(TWND wnd, TINT idx, TLPVOID data)
   }
 }
 
-TLPVOID _TLB_OnGetItemData(TWND wnd, TINT idx)
+TUI_LPARAM _TLB_OnGetItemData(TWND wnd, TINT idx)
 {
   tlistbox_t* item = 0;
   
-  item = _TLB_FindItemByIndex(wnd, idx);  
+  item = _TLB_FindItemByIndex(wnd, idx);
   if (item)
   {
     return item->data;
@@ -777,7 +791,7 @@ TLONG LISTBOXPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
     }
     case TLBM_SETITEMDATA:
     {
-      _TLB_OnSetItemData(wnd, (TINT)wparam, (TLPVOID)lparam);
+      _TLB_OnSetItemData(wnd, (TINT)wparam, (TUI_LPARAM)lparam);
       return 0;
     }
     case TLBM_GETITEMDATA:

@@ -14,11 +14,12 @@
 #endif
 
 #include "tui.h"
+#include "tuithrd.h"
 
 struct _TWNDPROCSTRUCT
 {
   TWNDPROC     wndproc;
-  TLPCSTR       clsname;
+  TLPCSTR      clsname;
   struct _TWNDPROCSTRUCT *prev;
   struct _TWNDPROCSTRUCT *next;
 };
@@ -76,6 +77,9 @@ struct _TUIENVSTRUCT
   ttheme_t          themes[THEME_LAST];
   /* accelerator */
   TUI_ACCEL*        accel;
+  /* timer */
+  ttimer_t*         wndtimer;
+  pthread_mutex_t   queue_locked;
 };
 
 struct _TUIWINDOWSTRUCT
@@ -95,18 +99,16 @@ struct _TUIWINDOWSTRUCT
   TLONG               enable;
   TLONG               visible;
   VALIDATEPROC        validateproc;
-  TUI_CHAR              infotext[TUI_MAX_WNDTEXT+1];
+  TUI_CHAR            infotext[TUI_MAX_WNDTEXT+1];
   /* curses lib */
 #ifdef __USE_CURSES__
   WINDOW*           win;
 #elif defined __USE_WIN32__
-  HANDLE            win; /* input */
+  HANDLE            win;  /* input */
   HANDLE            wout; /* output */
 #endif
   TDWORD            attrs;
   TDWORD            themeattrs;
-  /* last dialog returned message */
-  /*TUINT             dlgmsgid;*/
   
   /* links */
   TWND              prevwnd;
@@ -128,7 +130,7 @@ tthemeitem_t STANDARD_THEME[] =
   { BLACK_WHITE  }, /* COLOR_BTNFOCUSED  */
   { BLACK_YELLOW }, /* COLOR_HDRTEXT     */
   { CYAN_BLACK   }, /* COLOR_EDTTEXT     */
-  { BLACK_BLUE   }, /* COLOR_LBXTEXT     */
+  { WHITE_BLACK  }, /* COLOR_LBXTEXT     */
   { BLACK_BLUE   }, /* COLOR_WNDTITLE    */
   { BLACK_CYAN   }, /* COLOR_HIGHLIGHTED */
   { WHITE_BLACK  }, /* COLOR_DISABLED    */
@@ -313,7 +315,8 @@ tthemeitem_t MERCHANT_THEME[] =
 };
 
 /* global environment variable */
-TENV genvptr = 0;
+TENV genvptr      = 0;
+TWND TWND_DUMMY   = (TWND)(0xFFFFFFFF);
 
 
 /*-------------------------------------------------------------------
@@ -366,10 +369,29 @@ TLONG BUTTONPROC(TWND, TUINT, TWPARAM, TLPARAM);
 TLONG LISTCTRLPROC(TWND, TUINT, TWPARAM, TLPARAM);
 TLONG LISTPAGECTRLPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 TLONG TREECTRLPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
+
+/*typedef TUI_VOID (*TUI_TIMERPROC)(TWND, TUI_UINT32, TUI_VOID*);*/
+TUI_VOID _Environment_TimerLookupPostMsgProc(TWND, TUI_UINT32, TUI_VOID*);
+
+
 /*-------------------------------------------------------------------
  * functions
  *-----------------------------------------------------------------*/
 
+TUI_VOID
+_Environment_TimerLookupPostMsgProc(
+  TWND        wnd,
+  TUI_UINT32  id,
+  TUI_VOID*   arg)
+{
+  /* deque posting message */
+  _TuiDequeMsg();
+}
+
+const TWND TuiGetDummyWnd()
+{
+  return TWND_DUMMY;
+}
 
 TINT   TuiGetTheme()
 {
@@ -654,7 +676,7 @@ TLONG TuiStartup()
     
     env->dc.win    = stdscr;
     env->nextmove  = TVK_ENTER;
-    env->prevmove  = KEY_BTAB;
+    env->prevmove  = TVK_BTAB;
     env->notifykey = TVK_ENTER;    
 #elif defined __USE_WIN32__
     env->dc.win = GetStdHandle(STD_INPUT_HANDLE);
@@ -663,6 +685,13 @@ TLONG TuiStartup()
     env->dc.wout = GetStdHandle(STD_OUTPUT_HANDLE);
     _TuiClearScreen(&env->dc);
 #endif
+    env->wndtimer = Timer_Create(0);
+    
+    pthread_mutex_init(&env->queue_locked, 0);
+    
+    env->wndtimer->SetTimer(env->wndtimer,
+      TWND_DUMMY, 1, TUI_DEQUEUE_TIMEWAIT, /* deque posting messages every 3 secs */
+      TUI_FALSE, _Environment_TimerLookupPostMsgProc, env);
   }
     
   _TuiInitColors();
@@ -685,6 +714,9 @@ TVOID TuiShutdown()
     }
     TuiDestroyWnd(temp);
   }
+  
+  pthread_mutex_destroy(&genvptr->queue_locked);
+  Timer_Destroy(genvptr->wndtimer);
   free(genvptr);
   genvptr = 0;
   
@@ -1653,6 +1685,7 @@ TLONG TuiPostMsg(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       }
       msgq->wparam = wparam;
       
+      pthread_mutex_lock(&env->queue_locked);
       if (env->tailq)
       {
         env->tailq->next = msgq;
@@ -1662,6 +1695,7 @@ TLONG TuiPostMsg(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       {
         env->headq = env->tailq = msgq;
       }
+      pthread_mutex_unlock(&env->queue_locked);
       return TUI_OK;    
     }
   }
@@ -2044,10 +2078,13 @@ TLONG TuiGetMsg(TMSG* msg)
       msgq->wparam,
       msgq->lparam);
 
+    pthread_mutex_lock(&env->queue_locked);
     if (env->headq)
     {
       env->headq = env->headq->next;
     }
+    pthread_mutex_unlock(&env->queue_locked);
+    
     msgq->next = 0;
     if ((TWM_NOTIFY    == msgq->msg) ||
         (TWM_SETCURSOR == msgq->msg))
@@ -2056,7 +2093,9 @@ TLONG TuiGetMsg(TMSG* msg)
     }
     free(msgq);
   }
+  pthread_mutex_lock(&env->queue_locked);
   env->tailq = env->headq = 0; /* set to nil */
+  pthread_mutex_unlock(&env->queue_locked);
 
   memset(msg, 0, sizeof(TMSG));
   msg->wnd = env->activewnd;
@@ -2129,14 +2168,18 @@ TLONG _TuiRemoveAllMsgs()
   while (env->headq)
   {
     msgq = env->headq;
+    pthread_mutex_lock(&env->queue_locked);
     if (env->headq)
     {
       env->headq = env->headq->next;
     }
+    pthread_mutex_unlock(&env->queue_locked);
     msgq->next = 0;
     free(msgq);
   }
+  pthread_mutex_lock(&env->queue_locked);
   env->tailq = env->headq = 0; 
+  pthread_mutex_unlock(&env->queue_locked);
   return TUI_OK;
 }
 
@@ -2153,14 +2196,18 @@ TLONG _TuiDequeMsg()
       msgq->wparam,
       msgq->lparam);
 
+    pthread_mutex_lock(&env->queue_locked);
     if (env->headq)
     {
       env->headq = env->headq->next;
     }
+    pthread_mutex_unlock(&env->queue_locked);
     msgq->next = 0;
     free(msgq);
   }
+  pthread_mutex_lock(&env->queue_locked);
   env->tailq = env->headq = 0;
+  pthread_mutex_unlock(&env->queue_locked);
   return TUI_OK;
 }
 
@@ -2349,7 +2396,7 @@ TLONG TuiTranslateMsg(TMSG* msg)
       {
         if (env->accel[i].vkey == ch)
         {
-          TuiSendMsg(parent,
+          TuiSendMsg(TuiGetWndFrame(msg->wnd),
             TWM_COMMAND,
             env->accel[i].cmd, 0);
           return 0;
@@ -2382,6 +2429,47 @@ TLONG TuiPostQuitMsg(TLONG exitcode)
   env->quitcode = 1;
   env->exitcode = exitcode;
 
+  return TUI_OK;
+}
+
+TUI_LONG
+TuiSetTimer(
+  TWND wnd,
+  TUI_UINT32 id,
+  TUI_UINT32 timelapsed,
+  TUI_TIMERPROC proc)
+{
+  TENV env = TuiGetEnv();
+  TUI_DWORD style = TuiGetWndStyle(wnd);
+  /* window must be frame */
+  if (style & TWS_WINDOW)
+  {
+      env->wndtimer->SetTimer(env->wndtimer,
+                              wnd, id, timelapsed,
+                              TUI_FALSE, proc, env);
+      return TUI_OK;
+  }
+  return TUI_ERROR;
+}
+
+TUI_LONG TuiKillTimer(TWND wnd, TUI_UINT32 id)
+{
+  TENV env = TuiGetEnv();
+  env->wndtimer->KillTimer(env->wndtimer, wnd, id);
+  return TUI_OK;
+}
+
+TUI_LONG TuiSetTimerEvent(TWND wnd, TUI_UINT32 id, TUI_INT ev)
+{
+  TENV env = TuiGetEnv();
+  if (TIMER_SUSPEND == ev)
+  {
+    env->wndtimer->Suspend(env->wndtimer, wnd, id);
+  }
+  else
+  {
+    env->wndtimer->Resume(env->wndtimer, wnd, id);
+  }
   return TUI_OK;
 }
 
@@ -2455,6 +2543,19 @@ TWND TuiGetNextWnd(TWND wnd)
 TWND TuiGetPrevWnd(TWND wnd)
 {
   return wnd->prevwnd;
+}
+
+TWND   TuiGetWndFrame(TWND wnd)
+{
+  TWND frame = wnd;
+  TUI_DWORD style = TuiGetWndStyle(frame);
+  
+  while (!(style & TWS_WINDOW))
+  {
+    frame = TuiGetParent(frame);
+    style = TuiGetWndStyle(frame);
+  }
+  return frame;
 }
 
 TLONG TuiPrintTextAlignment(TLPSTR out, TLPCSTR in, TLONG limit, TINT align)

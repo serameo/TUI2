@@ -62,10 +62,10 @@ _list_iterator_release(list_iter_t iter)
 }
 
 /*------------------------------------------------------------*/
-tui_i32         list_insert_first(list_t*, const void*, tui_ui32);
-tui_i32         list_insert_last(list_t*, const void*, tui_ui32);
-tui_i32         list_insert_before(list_t*, list_iter_t, const void*, tui_ui32);
-tui_i32         list_insert_after(list_t*, list_iter_t, const void*, tui_ui32);
+list_iter_t     list_insert_first(list_t*, const void*, tui_ui32);
+list_iter_t     list_insert_last(list_t*, const void*, tui_ui32);
+list_iter_t     list_insert_before(list_t*, list_iter_t, const void*, tui_ui32);
+list_iter_t     list_insert_after(list_t*, list_iter_t, const void*, tui_ui32);
 void            list_free(list_t*);
 tui_i32         list_remove_at(list_t*, list_iter_t);
 tui_i32         list_remove_all(list_t*);
@@ -79,6 +79,7 @@ tui_ui32        list_get_item_data(list_iter_t, void*, tui_ui32);
 list_iter_t     list_get_next(list_iter_t);
 list_iter_t     list_get_prev(list_iter_t);
 node_t          list_get_item_pointer(list_iter_t);
+list_iter_t     list_get_last(list_t*);
 
 /*------------------------------------------------------------*/
 list_t*
@@ -108,6 +109,7 @@ List_Create(tui_i32 lparam)
         list->vtab.GetNext          = list_get_next;
         list->vtab.GetPrev          = list_get_prev;
         list->vtab.GetItemPointer   = list_get_item_pointer;
+        list->vtab.GetLast          = list_get_last;
     }
     return (list_t*)list;
 }
@@ -146,10 +148,9 @@ list_get_prev(list_iter_t iter)
   return (iter ? iter->prev : 0);
 }
 
-tui_i32
+list_iter_t
 list_insert_first(list_t* list, const void* vp, tui_ui32 size)
 {
-    tui_i32 rc = 0;
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
     
@@ -164,22 +165,13 @@ list_insert_first(list_t* list, const void* vp, tui_ui32 size)
 
             impl->nodes += 1;
         }
-        else
-        {
-            rc = -2;
-        }
     }
-    else
-    {
-        rc = -1;
-    }
-    return rc;
+    return iter;
 }
 
-tui_i32
+list_iter_t
 list_insert_last(list_t* list, const void* vp, tui_ui32 size)
 {
-    tui_i32 rc = 0;
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
     
@@ -204,22 +196,13 @@ list_insert_last(list_t* list, const void* vp, tui_ui32 size)
 
             impl->nodes += 1;
         }
-        else
-        {
-            rc = -2;
-        }
     }
-    else
-    {
-        rc = -1;
-    }
-    return rc;
+    return iter;
 }
 
-tui_i32
+list_iter_t
 list_insert_before(list_t* list, list_iter_t iter_after, const void* vp, tui_ui32 size)
 {
-    tui_i32 rc = 0;
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
     
@@ -239,22 +222,13 @@ list_insert_before(list_t* list, list_iter_t iter_after, const void* vp, tui_ui3
 
             impl->nodes += 1;
         }
-        else
-        {
-            rc = -2;
-        }
     }
-    else
-    {
-        rc = -1;
-    }
-    return rc;
+    return iter;
 }
 
-tui_i32
+list_iter_t
 list_insert_after(list_t* list, list_iter_t iter_before, const void* vp, tui_ui32 size)
 {
-    tui_i32 rc = 0;
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
     
@@ -274,16 +248,8 @@ list_insert_after(list_t* list, list_iter_t iter_before, const void* vp, tui_ui3
 
             impl->nodes += 1;
         }
-        else
-        {
-            rc = -2;
-        }
     }
-    else
-    {
-        rc = -1;
-    }
-    return rc;
+    return iter;
 }
 
 tui_i32
@@ -418,6 +384,12 @@ list_iter_t list_end(list_t* list)
     return ((list_impl_t*)list)->tail;
 }
 
+list_iter_t
+list_get_last(list_t* list)
+{
+  list_iter_t end = list_end(list);
+  return list_get_prev(end);
+}
 
 tui_i32
 list_set_item_data(
