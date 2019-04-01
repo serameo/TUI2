@@ -6,6 +6,13 @@
 #ifndef __TEXTUSERTINTERFACE_H__
 #define __TEXTUSERTINTERFACE_H__
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <curses.h>
+
+#include "tuitypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,13 +26,27 @@ extern "C" {
 #define TUI_MEM            -2
 
 /* miscellaneous */
-#define TUI_MAX_WNDTEXT    80
 
-#define TVK_BACK           0x08
 #define TVK_TAB            0x09
 #define TVK_ENTER          0x0A
 
 #define TVK_SPACE          0x20
+#ifdef __USE_CURSES__
+#define TVK_BTAB           KEY_BTAB
+#define TVK_BACK           KEY_BACKSPACE
+#define TVK_PRIOR          KEY_PPAGE
+#define TVK_NEXT           KEY_NPAGE
+#define TVK_END            KEY_END
+#define TVK_HOME           KEY_HOME
+#define TVK_LEFT           KEY_LEFT
+#define TVK_UP             KEY_UP
+#define TVK_RIGHT          KEY_RIGHT
+#define TVK_DOWN           KEY_DOWN
+#define TVK_INSERT         KEY_IC
+#define TVK_DELETE         KEY_DC
+#define TVK_HELP           KEY_HELP
+#else /* __USE_CURSES__*/
+#define TVK_BACK           0x08
 #define TVK_PRIOR          0x21
 #define TVK_NEXT           0x22
 #define TVK_END            0x23
@@ -37,7 +58,7 @@ extern "C" {
 #define TVK_INSERT         0x2D
 #define TVK_DELETE         0x2E
 #define TVK_HELP           0x2F
-
+#endif /* __USE_CURSES__*/
 
 #define TVK_ESCAPE         0x1B
 #define TVK_NUMPAD0        0x60
@@ -56,6 +77,32 @@ extern "C" {
 #define TVK_SUBTRACT       0x6D
 #define TVK_DECIMAL        0x6E
 #define TVK_DIVIDE         0x6F
+#ifdef __USE_CURSES__
+#define TVK_F1             KEY_F(1)
+#define TVK_F2             KEY_F(2)
+#define TVK_F3             KEY_F(3)
+#define TVK_F4             KEY_F(4)
+#define TVK_F5             KEY_F(5)
+#define TVK_F6             KEY_F(6)
+#define TVK_F7             KEY_F(7)
+#define TVK_F8             KEY_F(8)
+#define TVK_F9             KEY_F(9)
+#define TVK_F10            KEY_F(10)
+#define TVK_F11            KEY_F(11)
+#define TVK_F12            KEY_F(12)
+#define TVK_F13            KEY_F(13)
+#define TVK_F14            KEY_F(14)
+#define TVK_F15            KEY_F(15)
+#define TVK_F16            KEY_F(16)
+#define TVK_F17            KEY_F(17)
+#define TVK_F18            KEY_F(18)
+#define TVK_F19            KEY_F(19)
+#define TVK_F20            KEY_F(20)
+#define TVK_F21            KEY_F(21)
+#define TVK_F22            KEY_F(22)
+#define TVK_F23            KEY_F(23)
+#define TVK_F24            KEY_F(24)
+#else /* __USE_CURSES__ */
 #define TVK_F1             0x70
 #define TVK_F2             0x71
 #define TVK_F3             0x72
@@ -80,7 +127,7 @@ extern "C" {
 #define TVK_F22            0x85
 #define TVK_F23            0x86
 #define TVK_F24            0x87
-
+#endif /* __USE_CURSES__ */
 /*
  * 0x88 - 0x8F : unassigned
  */
@@ -92,129 +139,13 @@ extern "C" {
  * types
  *-----------------------------------------------------------------*/
 
-typedef long                TWPARAM;
-typedef long                TLPARAM;
-typedef long                TLONG;
-typedef int                 TINT;
-typedef void                TVOID;
-typedef void*               TLPVOID;
-typedef const char*         TLPCSTR;
-typedef char*               TLPSTR;
-typedef char                TTCHAR;
-typedef double              TDOUBLE;
-typedef unsigned long       TDWORD;
-typedef unsigned int        TUINT;
-typedef char                TINT8;
-typedef unsigned char       TUINT8;
-typedef short               TINT16;
-typedef unsigned short      TUINT16;
-typedef int                 TINT32;
-typedef unsigned int        TUINT32;
-typedef long long           TINT64;
-typedef unsigned long long  TUINT64;
-typedef TINT32              TBOOL;
-
-typedef long                TUI_WPARAM;
-typedef long                TUI_LPARAM;
-typedef long                TUI_LONG;
-typedef int                 TUI_INT;
-typedef void                TUI_VOID;
-typedef void*               TUI_LPVOID;
-typedef const char*         TUI_LPCSTR;
-typedef char*               TUI_LPSTR;
-typedef char                TUI_CHAR;
-typedef double              TUI_DOUBLE;
-typedef unsigned long       TUI_DWORD;
-typedef unsigned int        TUI_UINT;
-typedef char                TUI_INT8;
-typedef unsigned char       TUI_UINT8;
-typedef short               TUI_INT16;
-typedef unsigned short      TUI_UINT16;
-typedef int                 TUI_INT32;
-typedef unsigned int        TUI_UINT32;
-typedef long long           TUI_INT64;
-typedef unsigned long long  TUI_UINT64;
-typedef TUI_INT32           TUI_BOOL;
-
 #define TUI_TRUE            (TBOOL)1
 #define TUI_FALSE           (TBOOL)0
 
 #define TUI_MIN(a, b)       ((a) < (b) ? (a) : (b))
 #define TUI_MAX(a, b)       ((a) > (b) ? (a) : (b))
 
-
-/* device context */
-struct _TUIDEVICECONTEXSTRUCT;
-typedef struct _TUIDEVICECONTEXSTRUCT _TDC;
-typedef struct _TUIDEVICECONTEXSTRUCT *TDC;
-
-/* window handle */
-struct _TUIWINDOWSTRUCT;
-typedef struct _TUIWINDOWSTRUCT _TWND;
-typedef struct _TUIWINDOWSTRUCT *TWND;
-
-/* window procedure */
-typedef TLONG (*TWNDPROC)(TWND, TUINT, TWPARAM, TLPARAM);
-/* procedure type */
-typedef TLONG (*VALIDATEPROC)(TWND, TLPCSTR);
-
-/* environment */
-struct _TUIENVSTRUCT;
-typedef struct _TUIENVSTRUCT _TENV;
-typedef struct _TUIENVSTRUCT *TENV;
-
-/* accelerator */
-struct _TUIACCELSTRUCT
-{
-  TUI_INT       vkey;
-  TUI_UINT      cmd;
-};
-typedef struct _TUIACCELSTRUCT _TUI_ACCEL;
-typedef struct _TUIACCELSTRUCT TUI_ACCEL;
-
-/* message structure */
-struct _TMSGSTRUCT
-{
-  TWND    wnd;         /* window handle  */
-  TUINT   msg;         /* window message */
-  TWPARAM wparam;      /* parameter      */
-  TLPARAM lparam;      /* parameter      */
-};
-typedef struct _TMSGSTRUCT TMSG;
-
-/* notify message structure */
-struct _NMHDRSTRUCT
-{
-  TUINT id;            /* control id     */
-  TUINT code;          /* notify code    */
-  TWND  ctl;           /* control handle */
-};
-typedef struct _NMHDRSTRUCT TNMHDR;
-
-/* window rectangle */
-struct _TRECTSTRUCT
-{
-  TINT y;
-  TINT x;
-  TINT lines;
-  TINT cols;
-};
-typedef struct _TRECTSTRUCT TRECT;
-
-/* y,x position */
-struct _POSSTRUCT
-{
-  TINT y;
-  TINT x;
-};
-typedef struct _POSSTRUCT TPOS;
-
-struct _DRAWITEMSTRUCT
-{
-  TINT  idx;
-  TRECT rcitem;
-};
-typedef struct _DRAWITEMSTRUCT TDRAWITEM;
+#define TUI_DEQUEUE_TIMEWAIT      (3000)
 
 /* colors */
 enum
@@ -380,6 +311,7 @@ enum /*THEME_STANDARD*/
 #define TWM_ENABLE              (TWM_FIRST +   23) /* enable window       */
 #define TWM_GETCURSOR           (TWM_FIRST +   24) /* get cursor          */
 #define TWM_SETCURSOR           (TWM_FIRST +   25) /* set cursor          */
+#define TWM_TIMER               (TWM_FIRST +   26) /* set timer           */
 #define TWM_SHOWMSGBOX          (TWM_FIRST +  100) /* TuiDefFrameWndProc  */
 #define TWM_SHOWINPUTBOX        (TWM_FIRST +  101) /* TuiDefFrameWndProc  */
 #define TWM_SHOWLINEINPUTBOX    (TWM_FIRST +  102) /* TuiDefFrameWndProc  */
@@ -407,31 +339,6 @@ enum /*THEME_STANDARD*/
 /*-------------------------------------------------------------------
  * frame window
  *-----------------------------------------------------------------*/
-struct _INITPAGESTRUCT
-{
-  TWND firstchild;
-  TWND lastchild;
-};
-typedef struct _INITPAGESTRUCT _TINITPAGE;
-typedef struct _INITPAGESTRUCT *TINITPAGE;
-
-/* response from TWM_SHOWTMSGBOX, TWM_SHOWINPUTBOX, TWM_SHOWLINEINPUTBOX */
-struct _RESPONSEMSGBOXSTRUCT
-{
-  TNMHDR   hdr;
-  TTCHAR    text[TUI_MAX_WNDTEXT+1];
-};
-typedef struct _RESPONSEMSGBOXSTRUCT RESPONSEMSGBOX;
-typedef struct _RESPONSEMSGBOXSTRUCT DISPLAYINFO;
-
-struct _PAGECHANGESTRUCT
-{
-  TNMHDR   hdr;
-  TINT     frompage;
-  TINT     topage;
-};
-
-typedef struct _PAGECHANGESTRUCT PAGECHANGE;
 
 #define TUI_MAX_NMHDR        sizeof(RESPONSEMSGBOX)
 
@@ -449,59 +356,59 @@ typedef struct _PAGECHANGESTRUCT PAGECHANGE;
  *    Show message box
  */
 TVOID TuiShowMsgBox(
-  TWND    wnd,
-  TUINT    id,               /* user defined TFM_USER + #no to handle this value in TWM_NOTIFY */
-  TLPCSTR  caption,
-  TLPCSTR  text,
-  TUINT    flags,            /* combination from MB_XXX  */
-  TINT     show);            /* TW_SHOW or TW_HIDE       */
+  TWND      wnd,
+  TUINT     id,               /* user defined TFM_USER + #no to handle this value in TWM_NOTIFY */
+  TLPCSTR   caption,
+  TLPCSTR   text,
+  TUINT     flags,            /* combination from MB_XXX  */
+  TINT      show);            /* TW_SHOW or TW_HIDE       */
 
 /*
  * TuiShowInputBox()
  *    Show dynamically input box
  */
 TVOID TuiShowInputBox(
-  TWND    wnd,
-  TUINT    id,
-  TLPCSTR  caption,
-  TLPCSTR  text,
-  TUINT    flags,
-  TINT     limit,            /* limit input    */
-  TDWORD   edtstyle,         /* TES_XXX        */
-  TLPCSTR  deftext,          /* default input  */
-  TINT     show);
+  TWND      wnd,
+  TUINT     id,
+  TLPCSTR   caption,
+  TLPCSTR   text,
+  TUINT     flags,
+  TINT      limit,            /* limit input    */
+  TDWORD    edtstyle,         /* TES_XXX        */
+  TLPCSTR   deftext,          /* default input  */
+  TINT      show);
 
 /*
  * TuiShowLineInputBox()
  *    Show dynamically input box but one line 1 character input
  */
 TVOID TuiShowLineInputBox(
-  TWND    wnd,
-  TUINT    id,
-  TINT     y,                /* y-position */
-  TINT     x,                /* x-position */
-  TLPCSTR  text,
-  TLPCSTR  deftext,
-  TLPCSTR  validch,          /* valid characters */
-  TINT     align,            /* DT_CENTER or 0   */
-  TINT     show);
+  TWND      wnd,
+  TUINT     id,
+  TINT      y,                /* y-position */
+  TINT      x,                /* x-position */
+  TLPCSTR   text,
+  TLPCSTR   deftext,
+  TLPCSTR   validch,          /* valid characters */
+  TINT      align,            /* DT_CENTER or 0   */
+  TINT      show);
 
 #define TFN_PAGECHANGING        (TFM_USER +    1)
 #define TFN_PAGECHANGED         (TFM_USER +    2)
 
 TVOID TuiShowPage(
-  TWND    wnd,
-  TINT     npage,
-  TINT     show
+  TWND      wnd,
+  TINT      npage,
+  TINT      show
 );
 
 TVOID TuiSetCurPage(
-  TWND    wnd,
-  TINT     npage
+  TWND      wnd,
+  TINT      npage
 );
 
 TINT TuiGetCurPage(
-  TWND    wnd
+  TWND      wnd
 );
 
 /*-------------------------------------------------------------------
@@ -532,6 +439,7 @@ TINT TuiGetCurPage(
 #define TES_UNDERLINE           0x04000000
 #define TES_A2Z                 0x08000000
 #define TES_AUTOSUFFIX          0x10000000
+#define TES_NOTIFYKEYPRESSED    0x20000000
 
 #define TEM_LIMITTEXT           (TWM_USER  +    1)
 #define TEM_SETPASSWDCHAR       (TWM_USER  +    2)
@@ -544,6 +452,7 @@ TINT TuiGetCurPage(
 #define TEN_CHANGED             (TEN_FIRST  +   0)
 #define TEN_SETFOCUS            (TEN_FIRST  +   1)
 #define TEN_KILLFOCUS           (TEN_FIRST  +   2)
+#define TEN_KEYPRESSED          (TEN_FIRST  +   3)
 
 /* edit macros */
 #define TEDT_LimitText(edt, lim)    \
@@ -557,12 +466,7 @@ TINT TuiGetCurPage(
 #define TEDT_SetValidString(edt, val)    \
   TuiSendMsg(edt, TEM_SETVALIDSTRING, (TWPARAM)0, (TLPARAM)val)
 
-struct _VALIDMINMAXSTRUCT
-{
-  TINT min;
-  TINT max;
-};
-typedef struct _VALIDMINMAXSTRUCT VALIDMINMAX;
+
 #define TEDT_SetValidMinMax(edt, mn, mx, on)    \
 do {\
   VALIDMINMAX val; \
@@ -611,6 +515,7 @@ do {\
 #define TLBN_SETFOCUS           (TLBN_FIRST  +    0)
 #define TLBN_KILLFOCUS          (TLBN_FIRST  +    1)
 #define TLBN_SELCHANGED         (TLBN_FIRST  +    2)
+#define TLBN_SELITEM            (TLBN_FIRST  +    3)
 
 /* listbox macros */
 #define TLB_AddItem(lbx, text)    \
@@ -628,7 +533,7 @@ do {\
 #define TLB_SetItemData(lbx, idx, data)   \
   TuiSendMsg(lbx, TLBM_SETITEMDATA, (TWPARAM)idx, (TLPARAM)data)
 #define TLB_GetItemData(lbx, idx)   \
-  (TLPVOID)TuiSendMsg(lbx, TLBM_GETITEMDATA, (TWPARAM)idx, (TLPARAM)0)
+  (TLPARAM)TuiSendMsg(lbx, TLBM_GETITEMDATA, (TWPARAM)idx, (TLPARAM)0)
 #define TLB_SetItemText(lbx, idx, text)   \
   TuiSendMsg(lbx, TLBM_SETITEMTEXT, (TWPARAM)idx, (TLPARAM)text)
 #define TLB_GetItemText(lbx, idx, text)   \
@@ -705,6 +610,7 @@ do {\
 #define TLCN_ENDEDITCANCEL      (TLCN_FIRST  +    5)
 #define TLCN_BEGINMOVING        (TLCN_FIRST  +    6)
 #define TLCN_ENDMOVING          (TLCN_FIRST  +    7)
+#define TLCN_SELITEM            (TLCN_FIRST  +    8)
 
 #define LC_ENDEDITOK            1
 #define LC_ENDEDITCANCEL        0
@@ -712,26 +618,7 @@ do {\
 #define  LCFM_TEXT              0x0001
 #define  LCFM_ATTRS             0x0002
 #define  LCFM_DATA              0x0004
-struct _SUBITEMSTRUCT
-{
-  TINT       col;      /* column index, zero based */
-  TINT       idx;      /* row index, zero based    */
-  TTCHAR*     text;
-  TDWORD     attrs;    /* text attributes          */
-  TVOID*     data;     /* user data                */
-};
-typedef struct _SUBITEMSTRUCT TSUBITEM;
 
-struct _HEADERITEMSTRUCT
-{
-  TTCHAR*     caption;
-  TINT       cols;
-  TINT       align;      /* column alignment         */
-  TDWORD     attrs;      /* header text attributes   */
-  TDWORD     editstyle;  /* edit style, see TES_XXX  */
-  TINT       decwidth;   /* TES_DECIMAL or TES_AUTODECIMALCOMMA, default 6 */
-};
-typedef struct _HEADERITEMSTRUCT THEADERITEM;
 
 /* listctrl macros */
 #define TLC_AddColumn(lc, text, width, al)    \
@@ -871,19 +758,8 @@ do {\
  *-----------------------------------------------------------------*/
 #define TTREECTRL                   "TTREECTRL"
 
-struct _TREE_ITER_STRUCT;
-typedef struct _TREE_ITER_STRUCT TTREEITEM;
-
-struct _TTREEITEMDATASTRUCT
-{
-  TTCHAR      itemtext[TUI_MAX_WNDTEXT+1];
-  TLPARAM     lparam;
-  TBOOL       expanded;
-  TBOOL       selected;
-  TLONG       children;
-  TBOOL       populated;
-};
-typedef struct _TTREEITEMDATASTRUCT TTREEITEMDATA;
+#define TTCS_NOHIGHLIGHT        0x00100000
+#define TTCS_FULLSECROW         0x00200000
 
 #define TTCM_FIRST                  (TWM_USER   +     0)
 #define TTCM_INSERTITEM             (TTCM_FIRST +     1)
@@ -911,17 +787,8 @@ typedef struct _TTREEITEMDATASTRUCT TTREEITEMDATA;
 #define TTCN_ITEMCOLLAPSED          (TTCN_FIRST +     5)
 #define TTCN_KILLFOCUS              (TTCN_FIRST +     6)
 #define TTCN_SETFOCUS               (TTCN_FIRST +     7)
+#define TTCN_SELITEM                (TTCN_FIRST  +    8)
 
-struct _NMHDRTREEITEMSTRUCT
-{
-  TNMHDR hdr;          /* notification header */
-  TTREEITEM* item;
-};
-typedef struct _NMHDRTREEITEMSTRUCT TNMHDRTREEITEMCTRL;
-
-typedef TLONG (*LPTREEFINDITEMPROC)(const TVOID*, const TVOID*);
-typedef TLONG (*LPTREEEXPORTPROC)(FILE*, TTREEITEMDATA*);
-typedef TLONG (*LPTREEIMPORTPROC)(TTREEITEMDATA*, TLPCSTR);
 
 #define TTC_InsertItem(tc, parentitem, insertitem)    \
   (TTREEITEM*)TuiSendMsg(tc, TTCM_INSERTITEM, \
@@ -983,7 +850,10 @@ TLONG TuiStartup();
  *   End TUI environment
  */
 TVOID TuiShutdown();
-
+/*
+ *
+ */
+const TWND TuiGetDummyWnd();
 /*
  * TuiGetEnv()
  *   Get TUI environment
@@ -1066,6 +936,11 @@ TINT   TuiSetTheme(TINT themeidx);
  *   Synchronously get character input from screen
  */
 TLONG  TuiGetChar();
+/*
+ * TuiGetWndFrame()
+ *   find the frame window
+ */
+TWND   TuiGetWndFrame(TWND wnd);
 /*
  * TuiDefWndProc()
  *   All windows MUST be called at its window procedure.
@@ -1160,54 +1035,18 @@ TWND TuiCreateWnd(
 TWND TuiCreateWndEx(
   TLPCSTR    clsname,       /* class name must be registered before calling this function */
   TLPCSTR    wndname,       /* window name */
-  TDWORD    style,         /* window style, see TWS_XXX */
-  TDWORD    exstyle,       /* window style, see TWS_EXxxx */
-  TINT      y,             /* y-position       */
-  TINT      x,             /* x-position       */
-  TINT      lines,         /* window lines     */
-  TINT      cols,          /* window columns   */
-  TWND      parent,        /* parent of window */
-  TINT      id,            /* window id        */
+  TDWORD    style,          /* window style, see TWS_XXX */
+  TDWORD    exstyle,        /* window style, see TWS_EXxxx */
+  TINT      y,              /* y-position       */
+  TINT      x,              /* x-position       */
+  TINT      lines,          /* window lines     */
+  TINT      cols,           /* window columns   */
+  TWND      parent,         /* parent of window */
+  TINT      id,             /* window id        */
   TLPCSTR    infotext,      /* window info */
   TLPVOID    param          /* user parameter defined */
 );
-/* window template */
-struct _WNDTEMPLSTRUCT
-{
-  TLPCSTR  clsname;     /* window class   */
-  TLPCSTR  text;        /* window text    */
-  TINT     id;          /* window id      */
-  TINT     y;           /* y-position     */
-  TINT     x;           /* x-position     */
-  TINT     lines;       /* window lines   */
-  TINT     cols;        /* window columns */
-  TDWORD   style;       /* window style   */
-  VALIDATEPROC validateproc;  /* to validate value before exiting */
-                              /* the edit box return TUI_CONTINUE */
-                              /* if 2nd parameter is accepted     */
-                              /* otherwise return TUI_ERROR       */
-};
-typedef struct _WNDTEMPLSTRUCT WNDTEMPL;
 
-struct _FRMWNDTEMPLSTRUCT
-{
-  TLPCSTR  clsname;     /* window class   */
-  TLPCSTR  text;        /* window text    */
-  TINT     id;          /* window id      */
-  TINT     y;           /* y-position     */
-  TINT     x;           /* x-position     */
-  TINT     lines;       /* window lines   */
-  TINT     cols;        /* window columns */
-  TDWORD   style;       /* window style   */
-  TDWORD   exstyle;     /* window style   */
-  VALIDATEPROC validateproc;  /* to validate value before exiting */
-                              /* the edit box return TUI_CONTINUE */
-                              /* if 2nd parameter is accepted     */
-                              /* otherwise return TUI_ERROR       */
-  TLPCSTR  infotext;   /* to display information in a      */
-                      /* specific control                 */
-};
-typedef struct _FRMWNDTEMPLSTRUCT FRMWNDTEMPL;
 
 /*
  * TuiCreateWndTempl()
@@ -1430,6 +1269,14 @@ TLONG   TuiSetFocus(TWND wnd);
  */
 TWND   TuiGetFocus(TWND wnd);
 /*
+ *
+ */
+#define TIMER_SUSPEND 0
+#define TIMER_RESUME  1
+TUI_LONG TuiSetTimer(TWND wnd, TUI_UINT32 id, TUI_UINT32 timelapsed, TUI_TIMERPROC proc);
+TUI_LONG TuiKillTimer(TWND wnd, TUI_UINT32 id);
+TUI_LONG TuiSetTimerEvent(TWND wnd, TUI_UINT32 id, TUI_INT ev);
+/*
  * TuiMoveWnd()
  *   Move window object
  */
@@ -1525,15 +1372,6 @@ SHOWINFOPROC   TuiSetWndShowInfoProc(TWND wnd, SHOWINFOPROC showinfoproc);
 #define TDT_CENTER            0x0002
 #define TDT_RIGHT             0x0003
 
-struct _TUIDEVICECONTEXSTRUCT
-{
-#ifdef __USE_CURSES__
-  WINDOW*     win;
-#elif defined __USE_WIN32__
-  TVOID*      win;
-  TVOID*      wout;
-#endif
-};
 
 /*
  * TuiPrintTextAlignment()
@@ -1555,7 +1393,7 @@ TLONG TuiDrawText(TDC dc, TINT y, TINT x, TLPCSTR text, TDWORD attrs);
  * TuiPutChar()
  *   Draw a character on screen
  */
-TLONG TuiPutChar(TDC dc, TINT y, TINT x, TTCHAR ch, TDWORD attrs);
+TLONG TuiPutChar(TDC dc, TINT y, TINT x, TUI_CHAR ch, TDWORD attrs);
 /*
  * TuiMoveYX()
  *   Move cursor to (y, x)

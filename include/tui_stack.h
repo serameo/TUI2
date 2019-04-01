@@ -15,32 +15,32 @@ extern "C" {
 #endif
 
 struct _STACK_STRUCT;
-typedef struct _STACK_STRUCT stack_t;
+typedef struct _STACK_STRUCT tstack_t;
 
 /* constructor and destructor functions */
-stack_t*  Stack_Create(tui_i32 items, tui_i32 lparam);
-void      Stack_Destroy(stack_t*);
+tstack_t*  Stack_Create(tui_i32 items, tui_i32 lparam);
+void      Stack_Destroy(tstack_t*);
 
 /*
  * LIFO
  */
-typedef tui_i32       (*fn_stack_push)(stack_t*, const void*, tui_ui32);
-typedef void          (*fn_stack_pop)(stack_t*);
-typedef tui_ui32      (*fn_stack_top)(stack_t*, void*, tui_ui32);
-typedef tui_i32       (*fn_stack_is_empty)(stack_t*);
-typedef tui_i32       (*fn_stack_is_full)(stack_t*);
-typedef node_t        (*fn_stack_top_pointer)(stack_t*);
-typedef tui_i32       (*fn_stack_count)(stack_t*);
-typedef tui_i32       (*fn_stack_max_items)(stack_t*);
+typedef tui_i32       (*fn_stack_push)(tstack_t*, const tui_void*, tui_ui32);
+typedef tui_void      (*fn_stack_pop)(tstack_t*);
+typedef tui_ui32      (*fn_stack_top)(tstack_t*, tui_void*, tui_ui32);
+typedef tui_i32       (*fn_stack_is_empty)(tstack_t*);
+typedef tui_i32       (*fn_stack_is_full)(tstack_t*);
+typedef node_t        (*fn_stack_top_pointer)(tstack_t*);
+typedef tui_i32       (*fn_stack_count)(tstack_t*);
+typedef tui_i32       (*fn_stack_max_items)(tstack_t*);
 /*
-tui_i32   stack_push(stack_t*, const void*, tui_ui32);
-void      stack_pop(stack_t*);
-tui_ui32  stack_top(stack_t*, void*, tui_ui32);
-tui_i32   stack_is_empty(stack_t*);
-tui_i32   stack_is_full(stack_t*);
-node_t    stack_top_pointer(stack_t*);
-tui_i32   stack_count(stack_t*);
-tui_i32   stack_max_items(stack_t*);
+tui_i32   stack_push(tstack_t*, const void*, tui_ui32);
+void      stack_pop(tstack_t*);
+tui_ui32  tstack_top(tstack_t*, void*, tui_ui32);
+tui_i32   stack_is_empty(tstack_t*);
+tui_i32   stack_is_full(tstack_t*);
+node_t    tstack_top_pointer(tstack_t*);
+tui_i32   stack_count(tstack_t*);
+tui_i32   stack_max_items(tstack_t*);
 */
 
 struct _STACK_STRUCT

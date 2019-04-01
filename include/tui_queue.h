@@ -15,21 +15,21 @@ extern "C" {
 #endif
 
 struct _QUEUE_STRUCT;
-typedef struct _QUEUE_STRUCT queue_t;
+typedef struct _QUEUE_STRUCT tqueue_t;
 
 /* constructor and destructor functions */
-queue_t*  Queue_Create(tui_i32 lparam);
-void      Queue_Destroy(queue_t*);
+tqueue_t*  Queue_Create(tui_i32 lparam);
+void      Queue_Destroy(tqueue_t*);
 
 /*
  * FIFO
  */
-typedef tui_i32     (*fn_queue_enqueue)(queue_t*, const void*, tui_ui32);
-typedef void        (*fn_queue_dequeue)(queue_t*);
-typedef tui_ui32    (*fn_queue_first)(queue_t*, void*, tui_ui32);
-typedef node_t      (*fn_queue_first_pointer)(queue_t*);
-typedef tui_i32     (*fn_queue_is_empty)(queue_t*);
-typedef tui_i32     (*fn_queue_count)(queue_t*);
+typedef tui_i32     (*fn_queue_enqueue)(tqueue_t*, const void*, tui_ui32);
+typedef void        (*fn_queue_dequeue)(tqueue_t*);
+typedef tui_ui32    (*fn_queue_first)(tqueue_t*, void*, tui_ui32);
+typedef node_t      (*fn_queue_first_pointer)(tqueue_t*);
+typedef tui_i32     (*fn_queue_is_empty)(tqueue_t*);
+typedef tui_i32     (*fn_queue_count)(tqueue_t*);
 
 struct _QUEUE_STRUCT
 {
