@@ -22,6 +22,8 @@ SOURCES  = $(SRC_DIR)/tui_node.c \
            $(SRC_DIR)/tui_stack.c \
            $(SRC_DIR)/tui_queue.c \
            $(SRC_DIR)/tui_tree.c \
+           $(SRC_DIR)/tui_dic.c \
+           $(SRC_DIR)/tui_xcnf.c \
            $(SRC_DIR)/tui.c \
            $(SRC_DIR)/tuidc.c \
            $(SRC_DIR)/tuistc.c \
@@ -31,6 +33,7 @@ SOURCES  = $(SRC_DIR)/tui_node.c \
            $(SRC_DIR)/tuilctl.c \
            $(SRC_DIR)/tuitctl.c \
            $(SRC_DIR)/tuifrmwnd.c \
+           $(SRC_DIR)/tuithrd.c \
            $(SRC_DIR)/tui_test.c
 
 
