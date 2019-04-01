@@ -25,7 +25,7 @@ extern "C" {
 struct _TIMER_IMPL_STRUCT
 {
   struct _TUITIMERSTRUCT vtab;
-  list_t*       timers;
+  tlist_t*       timers;
   TUI_LPARAM    lparam;
 };
 typedef struct _TIMER_IMPL_STRUCT timer_impl_t;

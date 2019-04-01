@@ -17,22 +17,22 @@ struct _STACK_IMPL_STRUCT
   /* members */
   tui_i32     items;
   tui_i32     lparam;
-  list_t*     list;
+  tlist_t*     list;
 };
 typedef struct _STACK_IMPL_STRUCT stack_impl_t;
 
-tui_i32     stack_push(stack_t*, const void*, tui_ui32);
-void        stack_pop(stack_t*);
-tui_ui32    stack_top(stack_t*, void*, tui_ui32);
-tui_i32     stack_is_empty(stack_t*);
-tui_i32     stack_is_full(stack_t*);
-node_t      stack_top_pointer(stack_t*);
-tui_i32   stack_count(stack_t*);
-tui_i32   stack_max_items(stack_t*);
+tui_i32     stack_push(tstack_t*, const void*, tui_ui32);
+void        stack_pop(tstack_t*);
+tui_ui32    stack_top(tstack_t*, void*, tui_ui32);
+tui_i32     stack_is_empty(tstack_t*);
+tui_i32     stack_is_full(tstack_t*);
+node_t      stack_top_pointer(tstack_t*);
+tui_i32     stack_count(tstack_t*);
+tui_i32     stack_max_items(tstack_t*);
 
 /*-------------------------------------------------------*/
 
-stack_t*
+tstack_t*
 Stack_Create(tui_i32 items, tui_i32 lparam)
 {
   stack_impl_t* stack = (stack_impl_t*)malloc(sizeof(stack_impl_t));
@@ -56,11 +56,11 @@ Stack_Create(tui_i32 items, tui_i32 lparam)
     stack->vtab.Count       = stack_count;
     stack->vtab.GetMaxItems = stack_max_items;
   }
-  return (stack_t*)stack;
+  return (tstack_t*)stack;
 }
 
 void
-Stack_Destroy(stack_t* stack)
+Stack_Destroy(tstack_t* stack)
 {
   if (stack)
   {
@@ -71,9 +71,9 @@ Stack_Destroy(stack_t* stack)
 
 
 tui_i32
-stack_push(stack_t* stack, const void* vp, tui_ui32 size)
+stack_push(tstack_t* stack, const void* vp, tui_ui32 size)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   if (stack_is_full(stack))
   {
     return -1;
@@ -82,9 +82,9 @@ stack_push(stack_t* stack, const void* vp, tui_ui32 size)
 }
 
 void
-stack_pop(stack_t* stack)
+stack_pop(tstack_t* stack)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   if (stack_is_empty(stack))
   {
     return;
@@ -93,9 +93,9 @@ stack_pop(stack_t* stack)
 }
 
 tui_ui32
-stack_top(stack_t* stack, void* vp, tui_ui32 size)
+stack_top(tstack_t* stack, void* vp, tui_ui32 size)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   list_iter_t top = list->Begin(list);
   if (stack_is_empty(stack))
   {
@@ -105,22 +105,22 @@ stack_top(stack_t* stack, void* vp, tui_ui32 size)
 }
 
 tui_i32
-stack_is_empty(stack_t* stack)
+stack_is_empty(tstack_t* stack)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   return (0 >= list->Count(list));
 }
 
 tui_i32
-stack_is_full(stack_t* stack)
+stack_is_full(tstack_t* stack)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   return (((stack_impl_t*)stack)->items <= list->Count(list));
 }
 
-node_t    stack_top_pointer(stack_t* stack)
+node_t    stack_top_pointer(tstack_t* stack)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   list_iter_t top = list->Begin(list);
   
   if (stack_is_empty(stack))
@@ -130,13 +130,13 @@ node_t    stack_top_pointer(stack_t* stack)
   return list->GetItemPointer(top);
 }
 
-tui_i32   stack_count(stack_t* stack)
+tui_i32   stack_count(tstack_t* stack)
 {
-  list_t* list = ((stack_impl_t*)stack)->list;
+  tlist_t* list = ((stack_impl_t*)stack)->list;
   return list->Count(list);
 }
 
-tui_i32   stack_max_items(stack_t* stack)
+tui_i32   stack_max_items(tstack_t* stack)
 {
   return ((stack_impl_t*)stack)->items;
 }

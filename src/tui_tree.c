@@ -30,8 +30,8 @@ struct _IMPLTREE_STRUCT
     struct _TREE_STRUCT       vtab; /* always the first member */
     /* properties */
     tree_iter_t               root;
-    tui_ui32             items;
-    tui_i32                      lparam;
+    tui_ui32                  items;
+    tui_i32                   lparam;
 };
 typedef struct _IMPLTREE_STRUCT tree_impl_t;
 
@@ -87,43 +87,43 @@ _tree_iter_delete_item(tree_iter_t item)
 
 tui_i32
 _tree_populate_pre_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse);
 tui_i32
 _tree_populate_in_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse);
 tui_i32
 _tree_populate_post_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse);
 
 /*---------------------------------------------------------*/
 tree_iter_t     tree_insert_item(
-    tree_t*          tree,
+    ttree_t*          tree,
     tree_iter_t     parent,
     const void *    data,
     tui_ui32   size);
 void            tree_delete_item(
-    tree_t*          tree,
+    ttree_t*          tree,
     tree_iter_t     item);
 tree_iter_t     tree_find_item(
-    tree_t*                  tree,
+    ttree_t*                  tree,
     const void *            vp,
     fn_tree_compare_proc    compare);
 tree_iter_t     tree_find_next_item(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     const void * vp,
     fn_tree_compare_proc compare);
 
-tui_ui32        tree_count_item(tree_t* tree);
+tui_ui32        tree_count_item(ttree_t* tree);
 tui_ui32        tree_count_child(tree_iter_t item);
 tui_ui32        tree_get_level(tree_iter_t item);
 tui_i32         tree_set_item_data(tree_iter_t, const void*, tui_ui32);
@@ -134,7 +134,7 @@ tree_iter_t     tree_get_last_child(tree_iter_t);
 tree_iter_t     tree_get_prev_item(tree_iter_t);
 tree_iter_t     tree_get_next_item(tree_iter_t);
 tui_i32         tree_populate(
-    tree_t*     tree,
+    ttree_t*     tree,
     tree_iter_t item,
     void*       args,
     fn_tree_traverse_proc   traverse,
@@ -142,13 +142,13 @@ tui_i32         tree_populate(
                                  = 0 := IN-ORDER,
                                  > 0 := POST-ORDER
                               */
-tree_iter_t     tree_get_root_item(tree_t*);
-tui_i32         tree_get_param(tree_t*);
+tree_iter_t     tree_get_root_item(ttree_t*);
+tui_i32         tree_get_param(ttree_t*);
 node_t          tree_get_item_pointer(tree_iter_t);
 
 /*---------------------------------------------------------*/
 
-tree_t*
+ttree_t*
 Tree_Create(tui_i32 lparam)
 {
     tree_impl_t* tree = (tree_impl_t*)malloc(sizeof(tree_impl_t));
@@ -183,11 +183,11 @@ Tree_Create(tui_i32 lparam)
         tree->vtab.GetParam         = tree_get_param;
         tree->vtab.GetItemPointer   = tree_get_item_pointer;
     }
-    return (tree_t*)tree;
+    return (ttree_t*)tree;
 }
 
 void
-Tree_Destroy(tree_t* tree)
+Tree_Destroy(ttree_t* tree)
 {
     if (tree)
     {
@@ -198,7 +198,7 @@ Tree_Destroy(tree_t* tree)
 
 tree_iter_t
 tree_insert_item(
-    tree_t*         tree,
+    ttree_t*         tree,
     tree_iter_t     parent,
     const void *    data,
     tui_ui32   size)
@@ -240,7 +240,7 @@ tree_insert_item(
 
 void
 tree_delete_item(
-    tree_t*          tree,
+    ttree_t*          tree,
     tree_iter_t     item)
 {
     tree_iter_t parent  = 0;
@@ -295,7 +295,7 @@ tree_delete_item(
 }
 
 tui_ui32
-tree_count_item(tree_t* tree)
+tree_count_item(ttree_t* tree)
 {
     return ((tree_impl_t*)tree)->items;
 }
@@ -308,7 +308,7 @@ tree_count_child(tree_iter_t item)
 
 tree_iter_t
 tree_find_item(
-    tree_t*                  tree,
+    ttree_t*                  tree,
     const void *            data,
     fn_tree_compare_proc    compare)
 {
@@ -326,7 +326,7 @@ tree_find_item(
 
 tree_iter_t
 tree_find_next_item(
-    tree_t*                 tree,
+    ttree_t*                 tree,
     tree_iter_t             item,
     const void *            data,
     fn_tree_compare_proc    compare)
@@ -360,7 +360,7 @@ tree_find_next_item(
 
 tui_i32
 tree_populate(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse,
@@ -384,7 +384,7 @@ tree_populate(
 
 tui_i32
 _tree_populate_pre_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse)
@@ -415,7 +415,7 @@ _tree_populate_pre_order(
 
 tui_i32
 _tree_populate_in_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse)
@@ -447,7 +447,7 @@ _tree_populate_in_order(
 
 tui_i32
 _tree_populate_post_order(
-    tree_t*      tree,
+    ttree_t*      tree,
     tree_iter_t item,
     void* args,
     fn_tree_traverse_proc   traverse)
@@ -572,13 +572,13 @@ tree_get_next_item(tree_iter_t iter)
 }
 
 tree_iter_t
-tree_get_root_item(tree_t* tree)
+tree_get_root_item(ttree_t* tree)
 {
   return (((tree_impl_t*)tree)->root);
 }
 
 tui_i32
-tree_get_param(tree_t* tree)
+tree_get_param(ttree_t* tree)
 {
   return (((tree_impl_t*)tree)->lparam);
 }

@@ -33,7 +33,7 @@ typedef struct _LIST_IMPL_STRUCT list_impl_t;
 
 
 list_iter_t
-_list_iterator_init(const void* vp, tui_ui32 size)
+_list_iterator_init(const tui_void* vp, tui_ui32 size)
 {
     list_iter_t iter = (list_iter_t)malloc(sizeof(struct _LIST_ITER_STRUCT));
     if (iter != 0)
@@ -48,7 +48,7 @@ _list_iterator_init(const void* vp, tui_ui32 size)
     return iter;
 }
 
-void
+tui_void
 _list_iterator_release(list_iter_t iter)
 {
     if (iter)
@@ -62,27 +62,27 @@ _list_iterator_release(list_iter_t iter)
 }
 
 /*------------------------------------------------------------*/
-list_iter_t     list_insert_first(list_t*, const void*, tui_ui32);
-list_iter_t     list_insert_last(list_t*, const void*, tui_ui32);
-list_iter_t     list_insert_before(list_t*, list_iter_t, const void*, tui_ui32);
-list_iter_t     list_insert_after(list_t*, list_iter_t, const void*, tui_ui32);
-void            list_free(list_t*);
-tui_i32         list_remove_at(list_t*, list_iter_t);
-tui_i32         list_remove_all(list_t*);
-tui_i32         list_remove_first(list_t*);
-tui_i32         list_remove_last(list_t*);
-tui_ui32        list_get_count(list_t*);
-list_iter_t     list_begin(list_t*);
-list_iter_t     list_end(list_t*);
-tui_i32         list_set_item_data(list_iter_t, const void*, tui_ui32);
-tui_ui32        list_get_item_data(list_iter_t, void*, tui_ui32);
+list_iter_t     list_insert_first(tlist_t*, const tui_void*, tui_ui32);
+list_iter_t     list_insert_last(tlist_t*, const tui_void*, tui_ui32);
+list_iter_t     list_insert_before(tlist_t*, list_iter_t, const tui_void*, tui_ui32);
+list_iter_t     list_insert_after(tlist_t*, list_iter_t, const tui_void*, tui_ui32);
+tui_void        list_free(tlist_t*);
+tui_i32         list_remove_at(tlist_t*, list_iter_t);
+tui_i32         list_remove_all(tlist_t*);
+tui_i32         list_remove_first(tlist_t*);
+tui_i32         list_remove_last(tlist_t*);
+tui_ui32        list_get_count(tlist_t*);
+list_iter_t     list_begin(tlist_t*);
+list_iter_t     list_end(tlist_t*);
+tui_i32         list_set_item_data(list_iter_t, const tui_void*, tui_ui32);
+tui_ui32        list_get_item_data(list_iter_t, tui_void*, tui_ui32);
 list_iter_t     list_get_next(list_iter_t);
 list_iter_t     list_get_prev(list_iter_t);
 node_t          list_get_item_pointer(list_iter_t);
-list_iter_t     list_get_last(list_t*);
+list_iter_t     list_get_last(tlist_t*);
 
 /*------------------------------------------------------------*/
-list_t*
+tlist_t*
 List_Create(tui_i32 lparam)
 {
     list_impl_t* list = (list_impl_t*)malloc(sizeof(list_impl_t));
@@ -111,11 +111,11 @@ List_Create(tui_i32 lparam)
         list->vtab.GetItemPointer   = list_get_item_pointer;
         list->vtab.GetLast          = list_get_last;
     }
-    return (list_t*)list;
+    return (tlist_t*)list;
 }
 
-void
-List_Destroy(list_t* list)
+tui_void
+List_Destroy(tlist_t* list)
 {
     if (list)
     {
@@ -125,13 +125,13 @@ List_Destroy(list_t* list)
 }
 
 list_iter_t
-list_get_head(list_t* list)
+list_get_head(tlist_t* list)
 {
   return ((list_impl_t*)list)->head;
 }
 
 list_iter_t
-list_get_tail(list_t* list)
+list_get_tail(tlist_t* list)
 {
   return ((list_impl_t*)list)->tail;
 }
@@ -149,7 +149,7 @@ list_get_prev(list_iter_t iter)
 }
 
 list_iter_t
-list_insert_first(list_t* list, const void* vp, tui_ui32 size)
+list_insert_first(tlist_t* list, const tui_void* vp, tui_ui32 size)
 {
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -170,7 +170,7 @@ list_insert_first(list_t* list, const void* vp, tui_ui32 size)
 }
 
 list_iter_t
-list_insert_last(list_t* list, const void* vp, tui_ui32 size)
+list_insert_last(tlist_t* list, const tui_void* vp, tui_ui32 size)
 {
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -201,7 +201,7 @@ list_insert_last(list_t* list, const void* vp, tui_ui32 size)
 }
 
 list_iter_t
-list_insert_before(list_t* list, list_iter_t iter_after, const void* vp, tui_ui32 size)
+list_insert_before(tlist_t* list, list_iter_t iter_after, const tui_void* vp, tui_ui32 size)
 {
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -227,7 +227,7 @@ list_insert_before(list_t* list, list_iter_t iter_after, const void* vp, tui_ui3
 }
 
 list_iter_t
-list_insert_after(list_t* list, list_iter_t iter_before, const void* vp, tui_ui32 size)
+list_insert_after(tlist_t* list, list_iter_t iter_before, const tui_void* vp, tui_ui32 size)
 {
     list_iter_t iter = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -253,7 +253,7 @@ list_insert_after(list_t* list, list_iter_t iter_before, const void* vp, tui_ui3
 }
 
 tui_i32
-list_remove_at(list_t* list, list_iter_t iter)
+list_remove_at(tlist_t* list, list_iter_t iter)
 {
     tui_i32 rc = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -292,7 +292,7 @@ list_remove_at(list_t* list, list_iter_t iter)
 }
 
 tui_i32
-list_remove_all(list_t* list)
+list_remove_all(tlist_t* list)
 {
     tui_i32 rc = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -314,7 +314,7 @@ list_remove_all(list_t* list)
 }
 
 tui_i32
-list_remove_first(list_t* list)
+list_remove_first(tlist_t* list)
 {
     tui_i32 rc = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -340,7 +340,7 @@ list_remove_first(list_t* list)
 }
 
 tui_i32
-list_remove_last(list_t* list)
+list_remove_last(tlist_t* list)
 {
     tui_i32 rc = 0;
     list_impl_t* impl = (list_impl_t*)list;
@@ -368,24 +368,24 @@ list_remove_last(list_t* list)
 }
 
 tui_ui32
-list_get_count(list_t* list)
+list_get_count(tlist_t* list)
 {
     return ((list_impl_t*)list)->nodes;
 }
 
 list_iter_t
-list_begin(list_t* list)
+list_begin(tlist_t* list)
 {
     return ((list_impl_t*)list)->head;
 }
 
-list_iter_t list_end(list_t* list)
+list_iter_t list_end(tlist_t* list)
 {
     return ((list_impl_t*)list)->tail;
 }
 
 list_iter_t
-list_get_last(list_t* list)
+list_get_last(tlist_t* list)
 {
   list_iter_t end = list_end(list);
   return list_get_prev(end);
@@ -394,7 +394,7 @@ list_get_last(list_t* list)
 tui_i32
 list_set_item_data(
   list_iter_t iter,
-  const void* vp,
+  const tui_void* vp,
   tui_ui32 size)
 {
   node_t newnode = 0;
@@ -433,7 +433,7 @@ list_set_item_data(
 tui_ui32
 list_get_item_data(
   list_iter_t iter,
-  void* vp,
+  tui_void* vp,
   tui_ui32 size)
 {
   tui_ui32 node_size = 0;
@@ -443,7 +443,7 @@ list_get_item_data(
     if (vp && size >= iter->node_size)
     {
       memset(vp, 0, size);
-      memcpy(vp, (const void*)iter->node, iter->node_size);
+      memcpy(vp, (const tui_void*)iter->node, iter->node_size);
     }
   }
   return node_size;
