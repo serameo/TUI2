@@ -2069,13 +2069,39 @@ TLONG  TuiGetChar()
 TLONG TuiGetMsg(TMSG* msg)
 {
   TENV env = TuiGetEnv();
+  tmsgq_t* msgq = 0;
 
   if (env->quitcode)
   {
     return 0;
   }
   /* deque */
-  _TuiDequeMsg();
+  while (env->headq)
+  {
+    msgq = env->headq;
+    msgq->wnd->wndproc(msgq->wnd,
+      msgq->msg,
+      msgq->wparam,
+      msgq->lparam);
+
+    pthread_mutex_lock(&env->queue_locked);
+    if (env->headq)
+    {
+      env->headq = env->headq->next;
+    }
+    pthread_mutex_unlock(&env->queue_locked);
+    
+    msgq->next = 0;
+    if ((TWM_NOTIFY    == msgq->msg) ||
+        (TWM_SETCURSOR == msgq->msg))
+    {
+      free((TVOID*)msgq->lparam);
+    }
+    free(msgq);
+  }
+  pthread_mutex_lock(&env->queue_locked);
+  env->tailq = env->headq = 0; /* set to nil */
+  pthread_mutex_unlock(&env->queue_locked);
 
   memset(msg, 0, sizeof(TMSG));
   msg->wnd = env->activewnd;
@@ -2142,7 +2168,24 @@ TLONG _TuiAlignmentPrint(TLPSTR out, TLPCSTR in, TLONG limit, TINT align)
 
 TLONG _TuiRemoveAllMsgs()
 {
-  _TuiDequeMsg();
+  TENV env = TuiGetEnv();
+  tmsgq_t* msgq = 0;
+  /* deque */
+  while (env->headq)
+  {
+    msgq = env->headq;
+    pthread_mutex_lock(&env->queue_locked);
+    if (env->headq)
+    {
+      env->headq = env->headq->next;
+    }
+    pthread_mutex_unlock(&env->queue_locked);
+    msgq->next = 0;
+    free(msgq);
+  }
+  pthread_mutex_lock(&env->queue_locked);
+  env->tailq = env->headq = 0; 
+  pthread_mutex_unlock(&env->queue_locked);
   return TUI_OK;
 }
 
@@ -2163,13 +2206,13 @@ TLONG _TuiDequeMsg()
       msgq->msg,
       msgq->wparam,
       msgq->lparam);
-
+/*
     if ((TWM_NOTIFY    == msgq->msg) ||
         (TWM_SETCURSOR == msgq->msg))
     {
       free((TVOID*)msgq->lparam);
     }
-
+*/
     msgq->next = 0;
     free(msgq);
   }
