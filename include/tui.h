@@ -515,7 +515,7 @@ do {\
 #define TLBN_SETFOCUS           (TLBN_FIRST  +    0)
 #define TLBN_KILLFOCUS          (TLBN_FIRST  +    1)
 #define TLBN_SELCHANGED         (TLBN_FIRST  +    2)
-#define TLBN_SELITEM            (TLBN_FIRST  +    3)
+#define TLBN_ENTERITEM          (TLBN_FIRST  +    3)
 
 /* listbox macros */
 #define TLB_AddItem(lbx, text)    \
@@ -610,7 +610,7 @@ do {\
 #define TLCN_ENDEDITCANCEL      (TLCN_FIRST  +    5)
 #define TLCN_BEGINMOVING        (TLCN_FIRST  +    6)
 #define TLCN_ENDMOVING          (TLCN_FIRST  +    7)
-#define TLCN_SELITEM            (TLCN_FIRST  +    8)
+#define TLCN_ENTERITEM          (TLCN_FIRST  +    8)
 
 #define LC_ENDEDITOK            1
 #define LC_ENDEDITCANCEL        0
@@ -760,6 +760,7 @@ do {\
 
 #define TTCS_NOHIGHLIGHT        0x00100000
 #define TTCS_FULLSECROW         0x00200000
+#define TTCS_SHOWNODE           0x00400000
 
 #define TTCM_FIRST                  (TWM_USER   +     0)
 #define TTCM_INSERTITEM             (TTCM_FIRST +     1)
@@ -787,7 +788,7 @@ do {\
 #define TTCN_ITEMCOLLAPSED          (TTCN_FIRST +     5)
 #define TTCN_KILLFOCUS              (TTCN_FIRST +     6)
 #define TTCN_SETFOCUS               (TTCN_FIRST +     7)
-#define TTCN_SELITEM                (TTCN_FIRST  +    8)
+#define TTCN_ENTERITEM              (TTCN_FIRST  +    8)
 
 
 #define TTC_InsertItem(tc, parentitem, insertitem)    \

@@ -66,6 +66,14 @@ typedef TUINT32             TUI_UINT32;
 typedef TINT64              TUI_INT64;
 typedef TUINT64             TUI_UINT64;
 typedef TUI_INT32           TUI_BOOL;
+typedef TINT8               TUI_I8;
+typedef TUINT8              TUI_UI8;
+typedef TINT16              TUI_I16;
+typedef TUINT16             TUI_UI16;
+typedef TINT32              TUI_I32;
+typedef TUINT32             TUI_UI32;
+typedef TINT64              TUI_I64;
+typedef TUINT64             TUI_UI64;
 /* type definitions for tui data structure */
 typedef TUI_VOID            tui_void;
 typedef TUI_CHAR            tui_char;

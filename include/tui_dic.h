@@ -133,27 +133,15 @@ struct _dict_field_t
 };
 typedef struct _dict_field_t dictlist_t;
 
-struct _std_tdic_t
+struct _std_dic_t
 {
   tui_i32         nflds;         /* number of fields   */
   tui_i32         rec_bytes;     /* record bytes       */
   tui_i32         nhdrs;         /* number of headers  */
-  tdic_t*         dict;
-  tui_char*       dict_file;     /* dictionary file    */
   dictlist_t*     fld_first;
   dictlist_t*     fld_last;
 };
-typedef struct _std_tdic_t std_tdic_t;
-
-struct _bos_tdic_t
-{
-  struct _std_tdic_t  dicheader;
-  tui_void*           gblp;          /* global pointer     */
-  tui_char*           gbl_name;      /* global name        */
-  size_t              gbl_bytes;     /* global total bytes */
-  size_t              gbl_recs;      /* global total records */
-};
-typedef struct _bos_tdic_t bos_tdic_t;
+typedef struct _std_dic_t std_dic_t;
 
 enum
 {
@@ -195,7 +183,7 @@ enum _dict_constants
 tdic_t*  Dictionary_Create(tui_i32);
 tui_void Dictionary_Release(tdic_t*);
 
-typedef tui_void    (*fn_dict_handler)(std_tdic_t*, BOS_DICTIONARY*);
+typedef tui_void    (*fn_dict_handler)(std_dic_t*, BOS_DICTIONARY*);
 
 typedef tui_i32     (*fn_dict_load_from_file)(tdic_t*, FILE*, fn_dict_handler);
 typedef tui_char    (*fn_dict_get_char)(tdic_t*, tui_char*, tui_char*, tui_char);
@@ -205,11 +193,11 @@ typedef tui_double  (*fn_dict_get_double)(tdic_t*, tui_char*, tui_char*, tui_dou
 typedef tui_i32     (*fn_dict_get_string)(tdic_t*, tui_char*, tui_char*, tui_char*, tui_char*, tui_i32);
 typedef tui_i32     (*fn_dict_get_binary)(tdic_t*, tui_char*, tui_char*, tui_byte*, tui_byte*, tui_i32);
 typedef tui_i32     (*fn_dict_get_value)(tdic_t*, tui_char*, BOS_DICTIONARY*);
+typedef std_dic_t*  (*fn_dict_get_dict)(tdic_t*);
 
 struct _TUIDICTIONARYSTRUCT
 {
   fn_dict_load_from_file          LoadFromFile;
-  /*fn_dict_load_from_file_param    LoadFromFileWithParam;*/
   fn_dict_get_char                GetChar;
   fn_dict_get_int                 GetInt;
   fn_dict_get_float               GetFloat;
@@ -217,6 +205,7 @@ struct _TUIDICTIONARYSTRUCT
   fn_dict_get_string              GetString;
   fn_dict_get_binary              GetBinary;
   fn_dict_get_value               GetValue;
+  fn_dict_get_dict                GetDict;
 };
 
 
