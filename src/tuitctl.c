@@ -140,6 +140,11 @@ TLONG _TTC_OnImportFromFile(TWND wnd, FILE* fp, LPTREEIMPORTPROC proc)
         break;
       }
     }
+    /* tabs are required */
+    if (0 == tabs)
+    {
+      continue;
+    }
     len = strlen(psz);
     if (len > 0 && psz[len-1] == '\n')
     {
@@ -190,16 +195,19 @@ TLONG _TTC_OnImportFromFile(TWND wnd, FILE* fp, LPTREEIMPORTPROC proc)
         parent = view.item;
       }
     }
+    /* format text or data */
     memset(&data, 0, sizeof(data));
     if (proc)
     {
       if (proc(&data, psz) != 0)
       {
+        /* sometimes input may not required by user */
         continue;
       }
     }
     else
     {
+      /* no procedure introduced */
       strcpy(data.itemtext, psz);
     }
     
@@ -692,7 +700,7 @@ TVOID _TTC_OnKeyDown(TWND wnd, TLONG ch)
       /* send notification */
       nmhdr.id   = TuiGetWndID(wnd);
       nmhdr.ctl  = wnd;
-      nmhdr.code = TTCN_SELITEM;
+      nmhdr.code = TTCN_ENTERITEM;
       TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
     }
     default:
@@ -1030,15 +1038,16 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
   TTREEITEMDATA data;
   TTREECTRLSTRUCT* tc = 0;
   TDWORD children = 0;
-  TUI_CHAR buf[TUI_MAX_WNDTEXT + 1];
+  TUI_CHAR buf[BUFSIZ + 1];
   TINT shifted_right = 0;
   TINT textlen = 0;
+  TDWORD style = TuiGetWndStyle(wnd);
   
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
   tc->tree->GetItemData(item, &data, sizeof(data));
   
-  memset(buf, ' ', maxlen);
-  buf[TUI_MAX_WNDTEXT]  = 0;
+  memset(buf, ' ', sizeof(buf));
+  buf[BUFSIZ]  = 0;
   xpos = tc->tree->GetLevel(item);
   /* fill indents */
   if (xpos > 0)
@@ -1060,7 +1069,7 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
   children = tc->tree->CountChild(item);
 
   /* print node */
-  if (children > 0 && !file)
+  if ((TTCS_SHOWNODE & style) && children > 0 && !file)
   {
     if (data.expanded)
     {
@@ -1084,14 +1093,22 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
     {
       xpos += textlen;
     }
+    else
+    {
+      xpos = maxlen-1;
+    }
     buf[xpos] = 0;
+  }
+  else
+  {
+    xpos = maxlen-1;
   }
   /* copy to output */
   if (!file)
   {
     shifted_right = tc->shifted_right;
   }
-  strcpy(outtext, &buf[shifted_right]);
+  memcpy(outtext, &buf[shifted_right], xpos);
 }
 
 tui_i32 _TTC_ExpandAllItemsProc(tui_void* args, tree_iter_t item, const tui_void* node, tui_ui32 size)

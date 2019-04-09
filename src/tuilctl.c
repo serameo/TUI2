@@ -1234,7 +1234,7 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
       /* send notification */
       nmhdr.id   = TuiGetWndID(wnd);
       nmhdr.ctl  = wnd;
-      nmhdr.code = TLCN_SELITEM;
+      nmhdr.code = TLCN_ENTERITEM;
       TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
     }
     default:

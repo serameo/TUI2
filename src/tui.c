@@ -318,6 +318,7 @@ tthemeitem_t MERCHANT_THEME[] =
 /* global environment variable */
 TENV genvptr      = 0;
 TWND TWND_DUMMY   = (TWND)(0xFFFFFFFF);
+TUI_UINT32 TUI_DEQUEUE_ID = 1;
 
 
 /*-------------------------------------------------------------------
@@ -691,8 +692,8 @@ TLONG TuiStartup()
     pthread_mutex_init(&env->queue_locked, 0);
     
     env->wndtimer->SetTimer(env->wndtimer,
-      TWND_DUMMY, 1, TUI_DEQUEUE_TIMEWAIT, /* deque posting messages every 3 secs */
-      TUI_FALSE, _Environment_TimerLookupPostMsgProc, env);
+      TWND_DUMMY, TUI_DEQUEUE_ID, TUI_DEQUEUE_TIMEWAIT, /* deque posting messages every 3 secs */
+      TUI_TRUE, _Environment_TimerLookupPostMsgProc, env);
   }
     
   _TuiInitColors();
@@ -1697,6 +1698,10 @@ TLONG TuiPostMsg(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
         env->headq = env->tailq = msgq;
       }
       pthread_mutex_unlock(&env->queue_locked);
+      /* resume thread */
+      TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TIMER_RESUME);
+
+
       return TUI_OK;    
     }
   }
@@ -2064,39 +2069,13 @@ TLONG  TuiGetChar()
 TLONG TuiGetMsg(TMSG* msg)
 {
   TENV env = TuiGetEnv();
-  tmsgq_t* msgq = 0;
 
   if (env->quitcode)
   {
     return 0;
   }
   /* deque */
-  while (env->headq)
-  {
-    msgq = env->headq;
-    msgq->wnd->wndproc(msgq->wnd,
-      msgq->msg,
-      msgq->wparam,
-      msgq->lparam);
-
-    pthread_mutex_lock(&env->queue_locked);
-    if (env->headq)
-    {
-      env->headq = env->headq->next;
-    }
-    pthread_mutex_unlock(&env->queue_locked);
-    
-    msgq->next = 0;
-    if ((TWM_NOTIFY    == msgq->msg) ||
-        (TWM_SETCURSOR == msgq->msg))
-    {
-      free((TVOID*)msgq->lparam);
-    }
-    free(msgq);
-  }
-  pthread_mutex_lock(&env->queue_locked);
-  env->tailq = env->headq = 0; /* set to nil */
-  pthread_mutex_unlock(&env->queue_locked);
+  _TuiDequeMsg();
 
   memset(msg, 0, sizeof(TMSG));
   msg->wnd = env->activewnd;
@@ -2163,24 +2142,7 @@ TLONG _TuiAlignmentPrint(TLPSTR out, TLPCSTR in, TLONG limit, TINT align)
 
 TLONG _TuiRemoveAllMsgs()
 {
-  TENV env = TuiGetEnv();
-  tmsgq_t* msgq = 0;
-  /* deque */
-  while (env->headq)
-  {
-    msgq = env->headq;
-    pthread_mutex_lock(&env->queue_locked);
-    if (env->headq)
-    {
-      env->headq = env->headq->next;
-    }
-    pthread_mutex_unlock(&env->queue_locked);
-    msgq->next = 0;
-    free(msgq);
-  }
-  pthread_mutex_lock(&env->queue_locked);
-  env->tailq = env->headq = 0; 
-  pthread_mutex_unlock(&env->queue_locked);
+  _TuiDequeMsg();
   return TUI_OK;
 }
 
@@ -2192,23 +2154,33 @@ TLONG _TuiDequeMsg()
   while (env->headq)
   {
     msgq = env->headq;
+    
+    pthread_mutex_lock(&env->queue_locked);
+    env->headq = env->headq->next;
+    pthread_mutex_unlock(&env->queue_locked);
+    
     TuiSendMsg(msgq->wnd,
       msgq->msg,
       msgq->wparam,
       msgq->lparam);
 
-    pthread_mutex_lock(&env->queue_locked);
-    if (env->headq)
+    if ((TWM_NOTIFY    == msgq->msg) ||
+        (TWM_SETCURSOR == msgq->msg))
     {
-      env->headq = env->headq->next;
+      free((TVOID*)msgq->lparam);
     }
-    pthread_mutex_unlock(&env->queue_locked);
+
     msgq->next = 0;
     free(msgq);
   }
   pthread_mutex_lock(&env->queue_locked);
-  env->tailq = env->headq = 0;
+  if (!env->tailq)
+  {
+    env->tailq = env->headq = 0;
+  }
   pthread_mutex_unlock(&env->queue_locked);
+  /* pause thread */
+  TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TIMER_SUSPEND);
   return TUI_OK;
 }
 

@@ -244,12 +244,11 @@ TVOID _TLB_OnKeyDown(TWND wnd, TLONG ch)
     }
     case TVK_ENTER:
     {
-      /*TLBN_ENTERITEM*/
       TNMHDR nmhdr;
       /* send notification */
       nmhdr.id   = TuiGetWndID(wnd);
       nmhdr.ctl  = wnd;
-      nmhdr.code = TLBN_SELITEM;
+      nmhdr.code = TLBN_ENTERITEM;
       TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
     }
     default:

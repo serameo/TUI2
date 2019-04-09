@@ -33,15 +33,21 @@ static SPLAY_HEAD( tdic_tree, dict_s ) dict_root;
 SPLAY_PROTOTYPE( tdic_tree, dict_s, node, dict_compare )
 SPLAY_GENERATE( tdic_tree, dict_s, node, dict_compare )
 
-
+#define UNUSED_TREE(tree, key) \
+do {\
+  struct dict_s tmp = 0;\
+  memset(&tmp, 0, sizeof(tmp));\
+  tmp.key = key;\
+  SPLAY_INSERT( tdic_tree, (tree), &tmp );\
+} while(0)
 
 
 struct _TUIDICTIONARY_IMPL_STRUCT
 {
-  struct _TUIDICTIONARYSTRUCT      vtab;
-  struct tdic_tree                *root;
-  std_tdic_t                      *stddict;
-  tui_i32                          lparam;
+  struct _TUIDICTIONARYSTRUCT       vtab;
+  struct tdic_tree                  *root;
+  std_dic_t                         dic;
+  tui_i32                           lparam;
 };
 typedef struct _TUIDICTIONARY_IMPL_STRUCT dict_impl_t;
 
@@ -86,10 +92,10 @@ dict_add_key_value(
   return ( 0 == res ? DICT_ERROR : DICT_OK );
 }
 
-void
+tui_void
 _Dictionary_DictFieldHandler(
-  std_tdic_t* stddict,
-  BOS_DICTIONARY* fld_prop
+  std_dic_t*        stddict,
+  BOS_DICTIONARY*   fld_prop
 )
 {
   dictlist_t* fld = 0;
@@ -117,38 +123,27 @@ _Dictionary_DictFieldHandler(
 /*---------------------------------------------*/
 
 tui_void
-dict_ReleaseParam(
-  tdic_t*     dict,
-  std_tdic_t* stddict
+_dict_release_param(
+  tdic_t*     dict
 );
 
-/*
- * load a configuration from file
- */
-tui_i32
-dict_Load(
-  tdic_t*     dict,
-  FILE*       fp /* BOS dictionary file */
-);
 
 /*
  * load a configuration from file
  */
 
 tui_i32
-dict_LoadParam(
+dict_load_param(
   tdic_t*             dict,
   FILE*               fp,
   fn_dict_handler     dict_handler
-  /*,
-  std_tdic_t*         stddict*/
 );
 
 /*
- * dict_GetChar() return the integer of value
+ * dict_get_char() return the integer of value
  */
 tui_char
-dict_GetChar(
+dict_get_char(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -160,7 +155,7 @@ dict_GetChar(
  * dict_GetLong() return the integer of value
  */
 tui_i32
-dict_GetInt(
+dict_get_int(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -171,7 +166,7 @@ dict_GetInt(
  * dict_get_float() return the double of value
  */
 tui_float
-dict_GetFloat(
+dict_get_float(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -179,10 +174,10 @@ dict_GetFloat(
 );
 
 /*
- * dict_GetDouble() return the double of value
+ * dict_get_double() return the double of value
  */
 tui_double
-dict_GetDouble(
+dict_get_double(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -193,18 +188,18 @@ dict_GetDouble(
  * dict_get_string() return the length of value
  */
 tui_i32
-dict_GetString(
+dict_get_string(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
   tui_char*   def,    /* default value if there is no key       */
   tui_char*   out,    /* output will be copied                  */
   tui_i32     len     /* if len = -1, this function will return */
-                  /* the length of value                    */
+                      /* the length of value                    */
 );
 
 tui_i32
-dict_GetBinary(
+dict_get_binary(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -215,15 +210,18 @@ dict_GetBinary(
 );
 
 tui_i32
-dict_GetValue(
+dict_get_value(
   tdic_t*           dict,
   tui_char*         key,
   BOS_DICTIONARY*   value
 );
 
+std_dic_t*
+dict_get_dict(tdic_t*);
+
 /*---------------------------------------------*/
 tui_i32
-dict_get_value(
+_dict_get_value(
   tdic_t*           dict,
   tui_char*         key,
   BOS_DICTIONARY*   value
@@ -255,56 +253,19 @@ dict_get_value(
 }
 
 tui_i32
-dict_parse_line(
-  tdic_t*     dict,
-  tui_char*   line_buffer,
-  tui_long    id,
-  tui_i32     fldtype
-)
-{
-  tui_char key[21]   = "\0";
-  tui_char attrs[8]  = "\0";
-  tui_char buffer[8] = "\0";
-  BOS_DICTIONARY value;
-
-  /* empty line or comment line is not allowed to be kept */
-  if ( ( 0 == line_buffer )                  || 
-       ( 0 == strlen( line_buffer ) )
-     )
-  {
-    return DICT_SKIP_PARSING;
-  }
-
-  memcpy( &key[0], &line_buffer[0], 20 );     key[20]   = 0;
-  memcpy( &attrs[0], &line_buffer[20], 7 );   attrs[7] = 0;
-  
-  value.id = id;
-  strcpy(value.name, key);
-  buffer[3] = 0;
-  memcpy( buffer, attrs, 3 );
-  value.offset  = atoi( buffer );
-  memcpy( buffer, &attrs[3], 3 );
-  value.size    = atoi( buffer );
-  value.type    = attrs[6];
-  value.fldtype = fldtype;
-  
-  return  dict_add_key_value( dict, key, &value );
-}
-
-tui_i32
-dict_parse_line_param(
+_dict_parse_line(
   tdic_t*           dict,
   tui_char*         line_buffer,
   tui_long          id,
   tui_i32           fldtype,
-  fn_dict_handler   field_handler_proc,
-  bos_tdic_t*       bosdict
+  fn_dict_handler   field_handler_proc
 )
 {
-  tui_char key[21]   = "\0";
+  tui_char key[TUI_MAX_DICT_NAME+1]   = "\0";
   tui_char attrs[8]  = "\0";
   tui_char buffer[8] = "\0";
   BOS_DICTIONARY value;
+  dict_impl_t* impl = (dict_impl_t*)dict;
 
   /* empty line or comment line is not allowed to be kept */
   if ( ( 0 == line_buffer )                  || 
@@ -329,64 +290,29 @@ dict_parse_line_param(
   
   if ( field_handler_proc )
   {
-    field_handler_proc( (std_tdic_t*)bosdict, &value );
+    field_handler_proc( (std_dic_t*)&impl->dic, &value );
   }
   
   return  dict_add_key_value( dict, key, &value );
 }
-tui_i32
-dict_parse_line_std_param(
-  tdic_t*           dict,
-  tui_char*         line_buffer,
-  tui_long          id,
-  tui_i32           fldtype,
-  fn_dict_handler   field_handler_proc,
-  std_tdic_t*       stddict
+
+tui_void
+_dict_release_param(
+  tdic_t*     dict
 )
 {
-  tui_char key[21]   = "\0";
-  tui_char attrs[8]  = "\0";
-  tui_char buffer[8] = "\0";
-  BOS_DICTIONARY value;
-
-  /* empty line or comment line is not allowed to be kept */
-  if ( ( 0 == line_buffer )                  || 
-       ( 0 == strlen( line_buffer ) )
-     )
+  dict_impl_t* impl = (dict_impl_t*)dict;
+  dictlist_t* tmp = 0;
+  dictlist_t* fld = impl->dic.fld_first;
+  while ( fld )
   {
-    return DICT_SKIP_PARSING;
+    tmp = fld;
+    fld = fld->next;
+    free( tmp );
   }
-
-  memcpy( &key[0],   &line_buffer[0],  20 );   key[20]  = 0;
-  memcpy( &attrs[0], &line_buffer[20], 7  );   attrs[7] = 0;
-  
-  value.id = id;
-  strcpy(value.name, key);
-  buffer[3] = 0;
-  memcpy( buffer, attrs, 3 );
-  value.offset  = atoi( buffer );
-  memcpy( buffer, &attrs[3], 3 );
-  value.size    = atoi( buffer );
-  value.type    = attrs[6];
-  value.fldtype = fldtype;
-  
-  if ( field_handler_proc )
-  {
-    field_handler_proc( stddict, &value );
-  }
-  
-  return  dict_add_key_value( dict, key, &value );
 }
+
 /*-----------------------------------*/
-tui_i32
-dict_GetValue(
-  tdic_t*           dict,
-  tui_char*         key,
-  BOS_DICTIONARY*   value
-)
-{
-  return dict_get_value( dict, key, value );
-}
 
 tdic_t*
 Dictionary_Create(tui_i32 lparam)
@@ -395,19 +321,18 @@ Dictionary_Create(tui_i32 lparam)
   if (impl)
   {    
     memset(impl, 0, sizeof(dict_impl_t));
-    impl->root    = ( struct tdic_tree *)calloc( 1, sizeof( struct tdic_tree ) );
-    impl->stddict = ( std_tdic_t *)calloc( 1, sizeof( std_tdic_t ) );
-    impl->stddict = (tdic_t*)impl;
-    impl->lparam  = lparam;
+    impl->root                = ( struct tdic_tree *)calloc( 1, sizeof( struct tdic_tree ) );
+    impl->lparam              = lparam;
     /* functions */
-    impl->vtab.LoadFromFile           = dict_LoadParam;
-    impl->vtab.GetChar                = dict_GetChar;
-    impl->vtab.GetInt                 = dict_GetInt;
-    impl->vtab.GetFloat               = dict_GetFloat;
-    impl->vtab.GetDouble              = dict_GetDouble;
-    impl->vtab.GetString              = dict_GetString;
-    impl->vtab.GetBinary              = dict_GetBinary;
-    impl->vtab.GetValue               = dict_GetValue;
+    impl->vtab.LoadFromFile   = dict_load_param;
+    impl->vtab.GetChar        = dict_get_char;
+    impl->vtab.GetInt         = dict_get_int;
+    impl->vtab.GetFloat       = dict_get_float;
+    impl->vtab.GetDouble      = dict_get_double;
+    impl->vtab.GetString      = dict_get_string;
+    impl->vtab.GetBinary      = dict_get_binary;
+    impl->vtab.GetValue       = dict_get_value;
+    impl->vtab.GetDict        = dict_get_dict;
   }
   return ( tdic_t* )impl;
 }
@@ -420,26 +345,9 @@ Dictionary_Release(
   if (dict)
   {
     dict_impl_t* impl = (dict_impl_t*)dict;
-    dict_ReleaseParam(dict, impl->stddict);
-    free(impl->stddict);
+    _dict_release_param(dict);
     free(impl->root);
     free( dict );
-  }
-}
-
-tui_void
-dict_ReleaseParam(
-  tdic_t*     dict,
-  std_tdic_t* stddict
-)
-{
-  dictlist_t* tmp = 0;
-  dictlist_t* fld = stddict->fld_first;
-  while ( fld )
-  {
-    tmp = fld;
-    fld = fld->next;
-    free( tmp );
   }
 }
 
@@ -447,7 +355,7 @@ dict_ReleaseParam(
  * load a configuration from file
  */
 tui_i32
-dict_LoadParam(
+dict_load_param(
   tdic_t*           dict,
   FILE*             fp,
   fn_dict_handler   field_handler_proc
@@ -473,30 +381,31 @@ dict_LoadParam(
   if ( !feof( fp ) )
   {
     linep = fgets( header, DICT_MAX_CHAR_PER_LINE, fp );
-    memcpy( &buffer, &header[0], 6 ); buffer[6] = 0;
-    nflds = atoi( buffer );
-    memcpy( &buffer, &header[6], 3 ); buffer[3] = 0;
-    rec_bytes = atoi( buffer );
-    memcpy( &buffer, &header[9], 3 ); buffer[3] = 0;
-    nhdrs = atoi( buffer );
-    
-    impl->stddict->nflds = nflds;
-    impl->stddict->nhdrs = nhdrs;
-    impl->stddict->rec_bytes = rec_bytes;
+    if (linep != 0)
+    {
+      memcpy( &buffer, &header[0], 6 ); buffer[6] = 0;
+      nflds = atoi( buffer );
+      memcpy( &buffer, &header[6], 3 ); buffer[3] = 0;
+      rec_bytes = atoi( buffer );
+      memcpy( &buffer, &header[9], 3 ); buffer[3] = 0;
+      nhdrs = atoi( buffer );
+      
+      impl->dic.nflds      = nflds;
+      impl->dic.nhdrs      = nhdrs;
+      impl->dic.rec_bytes  = rec_bytes;
+    }
   }
 
   /* header */  
   while ( !feof( fp ) && id < nhdrs )
   {
     linep = fgets( line_buffer, DICT_MAX_CHAR_PER_LINE, fp );
-    
     if ( linep != 0 )
     {
       ++id;
-      dict_parse_line_std_param( dict,
+      _dict_parse_line( dict,
         line_buffer, id, HEADER_FIELD,
-        proc,
-        impl->stddict );
+        proc);
     }
   }
   /* records */
@@ -507,18 +416,33 @@ dict_LoadParam(
     if ( linep != 0 )
     {
       ++id;
-      dict_parse_line_std_param( dict, 
+      _dict_parse_line( dict, 
         line_buffer, id, RECORD_FIELD,
-        proc,
-        impl->stddict );
+        proc);
     }
   }
   return DICT_OK;
 }
 
+std_dic_t*
+dict_get_dict(tdic_t* dict)
+{
+  dict_impl_t* impl = (dict_impl_t*)dict;
+  return (std_dic_t*)&impl->dic;
+}
+
+tui_i32
+dict_get_value(
+  tdic_t*           dict,
+  tui_char*         key,
+  BOS_DICTIONARY*   value
+)
+{
+  return _dict_get_value( dict, key, value );
+}
 
 tui_char
-dict_GetChar(
+dict_get_char(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -534,7 +458,7 @@ dict_GetChar(
     return def;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
@@ -551,7 +475,7 @@ dict_GetChar(
 
 
 tui_i32
-dict_GetInt(
+dict_get_int(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -567,7 +491,7 @@ dict_GetInt(
     return def;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
@@ -584,7 +508,7 @@ dict_GetInt(
 
 
 tui_float
-dict_GetFloat(
+dict_get_float(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -600,7 +524,7 @@ dict_GetFloat(
     return def;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
@@ -615,7 +539,7 @@ dict_GetFloat(
 }
 
 tui_double
-dict_GetDouble(
+dict_get_double(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -631,7 +555,7 @@ dict_GetDouble(
     return def;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
@@ -646,7 +570,7 @@ dict_GetDouble(
 }
 /*typedef tui_i32     (*fn_dict_get_string)(tdic_t*, tui_char*, tui_char*, tui_i32, tui_char*, tui_i32);*/
 tui_i32
-dict_GetString(
+dict_get_string(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -668,7 +592,7 @@ dict_GetString(
     return -1;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
@@ -694,7 +618,7 @@ dict_GetString(
 
 
 tui_i32
-dict_GetBinary(
+dict_get_binary(
   tdic_t*     dict,
   tui_char*   key,    /* key to get value                       */
   tui_char*   text,   /* sFull from BOS global                  */
@@ -716,7 +640,7 @@ dict_GetBinary(
     return -1;
   }
 
-  rc = dict_get_value(
+  rc = _dict_get_value(
           dict,
           key,
           &value
