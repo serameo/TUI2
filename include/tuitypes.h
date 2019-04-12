@@ -7,16 +7,12 @@
 #define __TUI_TYPES_H__
 
 #include <curses.h>
+#include "tuidefs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*-------------------------------------------------------------------
- * defines
- *-----------------------------------------------------------------*/
-
-#define TUI_MAX_WNDTEXT    80
 /*-------------------------------------------------------------------
  * types
  *-----------------------------------------------------------------*/
@@ -262,6 +258,15 @@ struct _SUBITEMSTRUCT
   TUI_LPARAM    data;     /* user data                */
 };
 typedef struct _SUBITEMSTRUCT TSUBITEM;
+
+struct _NMHDRITEMSTRUCT
+{
+  TNMHDR      hdr;          /* notification header */
+  TINT        row;
+  TINT        col;
+};
+typedef struct _NMHDRITEMSTRUCT TNMHDRITEMSTRUCT;
+
 
 struct _HEADERITEMSTRUCT
 {
