@@ -493,18 +493,14 @@ TVOID _TEDT_OnKeyDown(TWND wnd, TLONG ch)
 /*
   switch (ch)
   {
-    case KEY_RIGHT:
-    case KEY_LEFT:
-    case KEY_DOWN:
-    case KEY_UP:
     case TVK_ENTER:
-    case KEY_ENTER:
     case TVK_TAB:
-    case KEY_BTAB:
     case TVK_PRIOR:
-    case KEY_PPAGE:
     case TVK_NEXT:
-    case KEY_NPAGE:
+    case TVK_UP:
+    case TVK_DOWN:
+    case TVK_RIGHT:
+    case TVK_LEFT:
     {
       TLONG rc = _TEDT_OnKillFocus(wnd);
       if (TUI_CONTINUE == rc)
