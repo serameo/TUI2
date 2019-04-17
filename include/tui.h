@@ -350,39 +350,40 @@ do {\
 #define TLCN_FIRST              (TWM_USER +  300)
 */
 /* listctrl states */
-#define LCS_VIEW                0
-#define LCS_BEGINEDIT           0x0001
-#define LCS_EDITING             0x0002
-#define LCS_ENDEDIT             0x0003
-#define LCS_BEGININSERT         0x0004
-#define LCS_INSERTING           0x0005
-#define LCS_ENDINSERT           0x0006
-#define LCS_BEGINMOVING         0x0001
-#define LCS_MOVINGCURSOR        0x0002
-#define LCS_ENDMOVING           0x0003
+#define LCS_VIEW                  0x0000
+#define LCS_BEGINEDITING          0x0001
+#define LCS_EDITING               0x0002
+#define LCS_ENDEDITING            0x0000
+#define LCS_BEGININSERTING        0x0001
+#define LCS_INSERTING             0x0002
+#define LCS_ENDINSERTING          0x0000
+#define LCS_BEGINMOVING           0x0001
+#define LCS_MOVINGCURSOR          0x0002
+#define LCS_ENDMOVING             0x0000
 
 #define TLCN_SETFOCUS             (TLCN_FIRST  +    0)
 #define TLCN_KILLFOCUS            (TLCN_FIRST  +    1)
 #define TLCN_SELCHANGED           (TLCN_FIRST  +    2)
-#define TLCN_BEGINEDITCELL        (TLCN_FIRST  +    3)
-#define TLCN_ENDEDITCELLOK        (TLCN_FIRST  +    4)
-#define TLCN_ENDEDITCELLCANCEL    (TLCN_FIRST  +    5)
-#define TLCN_BEGINMOVING          (TLCN_FIRST  +    6)
-#define TLCN_ENDMOVING            (TLCN_FIRST  +    7)
-#define TLCN_ENTERITEM            (TLCN_FIRST  +    8)
-#define TLCN_BEGINEDITROW         (TLCN_FIRST  +    9)
-#define TLCN_ENDEDITROWOK         (TLCN_FIRST  +   10)
-#define TLCN_ENDEDITROWCANCEL     (TLCN_FIRST  +   11)
-#define TLCN_BEGININSERTCELL      (TLCN_FIRST  +   12)
-#define TLCN_ENDINSERTCELLOK      (TLCN_FIRST  +   13)
-#define TLCN_ENDINSERTCELLCANCEL  (TLCN_FIRST  +   14)
+#define TLCN_BEGINMOVING          (TLCN_FIRST  +    3)
+#define TLCN_MOVINGCURSOR         (TLCN_FIRST  +    4)
+#define TLCN_ENDMOVING            (TLCN_FIRST  +    5)
+#define TLCN_BEGINEDITROW         (TLCN_FIRST  +    6)
+#define TLCN_ENDEDITROWOK         (TLCN_FIRST  +    7)
+#define TLCN_ENDEDITROWCANCEL     (TLCN_FIRST  +    8)
+#define TLCN_BEGINEDIT            (TLCN_FIRST  +    9)
+#define TLCN_ENDEDITOK            (TLCN_FIRST  +   10)
+#define TLCN_ENDEDITCANCEL        (TLCN_FIRST  +   11)
+#define TLCN_BEGININSERTROW       (TLCN_FIRST  +   12)
+#define TLCN_ENDINSERTROWOK       (TLCN_FIRST  +   13)
+#define TLCN_ENDINSERTROWCANCEL   (TLCN_FIRST  +   14)
 
-#define LC_ENDEDITOK            1
-#define LC_ENDEDITCANCEL        0
 
-#define  LCFM_TEXT              0x0001
-#define  LCFM_ATTRS             0x0002
-#define  LCFM_DATA              0x0004
+#define LC_ENDEDITOK              1
+#define LC_ENDEDITCANCEL          0
+
+#define  LCFM_TEXT                0x0001
+#define  LCFM_ATTRS               0x0002
+#define  LCFM_DATA                0x0004
 
 
 /* listctrl macros */
