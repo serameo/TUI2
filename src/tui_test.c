@@ -53,7 +53,7 @@ WNDTEMPL dlg3[] =
   { "mytreectlproc", "Dialog3", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },
   /* 2nd and others are controls */
   { TTREECTRL, "",    IDC_TREECTRL1,  0,  0,  16,  80, 
-    TWS_CHILD|TWS_VISIBLE, 0 },
+    TWS_CHILD|TWS_VISIBLE/*|TTCS_FULLSECROW/*|TTCS_NOHIGHLIGHT*/, 0 },
   { TBUTTON, "Print",    IDC_PRINT,  20,  20,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
   { TBUTTON, "Close",    IDC_CLOSE,  20,  40,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
   /* the last is the end-of-controls */
