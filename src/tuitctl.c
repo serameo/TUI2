@@ -22,14 +22,15 @@
  *-----------------------------------------------------------------*/
 struct _TTREECTRLSTRUCT
 {
-  ttree_t*             tree;               /* see also tui_tree.h */
+  ttree_t*            tree;               /* see also tui_tree.h */
   LPTREEFINDITEMPROC  findproc;           /* to compare item */
   TTREEITEM*          firstvisibleitem;   /* the first item is visible in the tree control */
   TTREEITEM*          lastvisibleitem;    /* the first item is visible in the tree control */
   TTREEITEM*          curselitem;         /* the current selected item */
-  tlist_t*             visibleitems;
+  tlist_t*            visibleitems;
   TINT                indent;
   TINT                shifted_right;
+  TINT                shifted;
 };
 typedef struct _TTREECTRLSTRUCT _TTREECTRLSTRUCT;
 typedef struct _TTREECTRLSTRUCT TTREECTRLSTRUCT;
@@ -57,11 +58,16 @@ TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc);
 TLONG _TTC_OnImportFromFile(TWND wnd, FILE* fp,LPTREEIMPORTPROC impproc);
 TVOID _TTC_OnExpandAllItems(TWND wnd);
 TVOID _TTC_OnCollapseAllItems(TWND wnd);
+TINT  _TTC_OnGetIndentText(TWND wnd);
+TVOID _TTC_OnSetIndentText(TWND wnd, TINT indent);
+TINT  _TTC_OnGetShiftedText(TWND wnd);
+TVOID _TTC_OnSetShiftedText(TWND wnd, TINT shifted);
+
 
 TVOID _TTC_FreshView(TWND wnd);
 /*typedef tui_i32         (*fn_tree_compare_proc)(const tui_void*, const tui_void*);*/
 tui_i32 _TTC_DefFindItemProc(const tui_void* datap, const tui_void* itemp);
-TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT maxlen, TBOOL file, TBOOL fullrow);
+TVOID _TTC_GetDisplayedText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT maxlen, TBOOL file, TBOOL fullrow);
 
 TVOID _TTC_AdjustVisibleItems(TWND wnd);
 TTREEITEM* _TTC_MoveNext(TWND wnd, TLONG times);
@@ -258,7 +264,7 @@ TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc)
     tc->tree->GetItemData(view.item, &data, sizeof(TTREEITEMDATA));
     
     memset(buf, 0, sizeof(buf));
-    _TTC_GetDisplayText(wnd, buf, view.item, BUFSIZ-1, TUI_TRUE, TUI_FALSE);
+    _TTC_GetDisplayedText(wnd, buf, view.item, BUFSIZ-1, TUI_TRUE, TUI_FALSE);
     
     if (prnproc)
     {
@@ -471,7 +477,7 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   list_iter_t iter = 0;
   TTREEVIEWITEM view;
   TLONG i = 0;
-  TINT firstindex = 0;
+  TINT firstvisibleindex = 0;
   TINT curindex = 0;
   list_iter_t first_iter = 0;
   list_iter_t cur_iter = 0;
@@ -479,13 +485,14 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   TINT first_moves = 0;
   TINT cur_moves = 0;
   TBOOL movefirst = TUI_TRUE;
-  
+
   TuiGetWndRect(wnd, &rc);
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
   
   /* change selection item */
+  /* find the current selection index */
+  firstvisibleindex = 0;
   iter = tc->visibleitems->Begin(tc->visibleitems);
-  /* find the first index */
   while (iter != tc->visibleitems->End(tc->visibleitems))
   {
     tc->visibleitems->GetItemData(iter, &view, sizeof(view));
@@ -496,10 +503,16 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
       break;
     }
     iter = tc->visibleitems->GetNext(iter);
-    ++firstindex;
+    ++firstvisibleindex;
   }
-  /* find the current selection index */
-  curindex = firstindex;
+  if (0 == first_iter)
+  {
+    return tc->curselitem;
+  }
+
+  /* find the current index */
+  cur_iter = first_iter;
+  curindex = firstvisibleindex;
   while (iter != tc->visibleitems->End(tc->visibleitems))
   {
     tc->visibleitems->GetItemData(iter, &view, sizeof(view));
@@ -513,11 +526,6 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
     ++curindex;
   }
   
-  if (curindex == 0)
-  {
-    /* no more item to move next */
-    return tc->curselitem;
-  }
   /* un-highlighting the old item */
   tc->tree->GetItemData(tc->curselitem, &data, sizeof(data));
   data.selected = TUI_FALSE;
@@ -525,27 +533,32 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   
   /* highlighting the new item */
   iter = cur_iter;
-  cur_moves = TUI_MAX(0, TUI_MIN(move_times, curindex - firstindex + 1));
-  for (i=0; i<cur_moves && iter != tc->visibleitems->Begin(tc->visibleitems); ++i)
+  cur_moves = 0;
+  for (i=0; i<move_times && iter != 0; ++i, ++cur_moves)
   {
     iter = tc->visibleitems->GetPrev(iter);
   }
+  
+  if (firstvisibleindex > 0 && curindex - cur_moves < firstvisibleindex)
+  {
+    movefirst = TUI_TRUE;
+  }
+  else if (0 == firstvisibleindex && cur_moves >= curindex)
+  {
+    iter = tc->visibleitems->Begin(tc->visibleitems);
+  }
+  
   tc->visibleitems->GetItemData(iter, &view, sizeof(view));
   tc->tree->GetItemData(view.item, &data, sizeof(TTREEITEMDATA));
   tc->curselitem = view.item;
   tc->tree->GetItemData(tc->curselitem, &data, sizeof(data));
   data.selected = TUI_TRUE;
   tc->tree->SetItemData(tc->curselitem, &data, sizeof(data));
-  
-  if (firstindex <= curindex - cur_moves)
-  {
-    movefirst = TUI_FALSE;
-  }
 
   if (movefirst)
   {
     /* how actual many movements */
-    first_moves = TUI_MIN(cur_moves, TUI_MAX(cur_moves, firstindex-move_times));
+    first_moves = TUI_MIN(cur_moves, move_times);
     iter = first_iter;
     for (i=0; i<first_moves && iter != tc->visibleitems->Begin(tc->visibleitems); ++i)
     {
@@ -593,99 +606,7 @@ TVOID _TTC_OnKeyDown(TWND wnd, TLONG ch)
       break;
     }
     
-#if defined __USE_CURSES__
-    case KEY_F(10):
-#elif defined __USE_WIN32__
-    case TVK_F10:
-#endif
-    {
-      /* end moving */
-      /* begin edit */
-      break;
-    }
-    
-#if defined __USE_CURSES__
-    case KEY_F(12):
-#elif defined __USE_WIN32__
-    case TVK_F12:
-#endif
-    {
-      break;
-    }
-
-#if defined __USE_CURSES__
-    case KEY_F(11):
-#elif defined __USE_WIN32__
-    case TVK_F11:
-#endif
-    {
-      break;
-    }
-
-      
-    /* move down 1 page */
-#ifdef __USE_CURSES__
-    case KEY_NPAGE:
-#elif defined __USE_WIN32__
-    case TVK_NEXT:
-#endif
-    {
-      selitem = _TTC_MoveNext(wnd, rc.lines);
-      _TTC_OnSetSelItem(wnd, selitem);
-      break;
-    }
-    
-#if defined __USE_CURSES__
-    case KEY_RIGHT:
-#elif defined __USE_WIN32__
-    case TVK_RIGHT:
-#endif
-    {
-      tc->shifted_right = TUI_MIN(80, tc->shifted_right+8);
-      /* update item on the screen */
-      _TTC_FreshView(wnd);
-      break;
-    }
-
-#if defined __USE_CURSES__
-    case KEY_DOWN:
-#elif defined __USE_WIN32__
-    case TVK_DOWN:
-#endif
-    {
-      selitem = _TTC_MoveNext(wnd, 1);
-      _TTC_OnSetSelItem(wnd, selitem);
-      break;
-    }
-
-    /* move up 1 page */
-#ifdef __USE_CURSES__
-    case KEY_PPAGE:
-#elif defined __USE_WIN32__
-    case TVK_PRIOR:
-#endif
-    {
-      selitem = _TTC_MovePrev(wnd, rc.lines);
-      _TTC_OnSetSelItem(wnd, selitem);
-      break;
-    }
-    
-#if defined __USE_CURSES__
-    case KEY_LEFT:
-#elif defined __USE_WIN32__
-    case TVK_LEFT:
-#endif
-    {
-      tc->shifted_right = TUI_MAX(0, tc->shifted_right-8);
-      /* update item on the screen */
-      _TTC_FreshView(wnd);
-      break;
-    }
-#if defined __USE_CURSES__
-    case KEY_UP:
-#elif defined __USE_WIN32__
     case TVK_UP:
-#endif
     {
       /* check if the last visible item */
       selitem = _TTC_MovePrev(wnd, 1);
@@ -693,16 +614,45 @@ TVOID _TTC_OnKeyDown(TWND wnd, TLONG ch)
       _TTC_OnSetSelItem(wnd, selitem);
       break;
     }
-    
-    case TVK_ENTER:
+
+    case TVK_DOWN:
     {
-      TNMHDR nmhdr;
-      /* send notification */
-      nmhdr.id   = TuiGetWndID(wnd);
-      nmhdr.ctl  = wnd;
-      nmhdr.code = TTCN_ENTERITEM;
-      TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
+      selitem = _TTC_MoveNext(wnd, 1);
+      _TTC_OnSetSelItem(wnd, selitem);
+      break;
     }
+
+    case TVK_NEXT:
+    {
+      selitem = _TTC_MoveNext(wnd, rc.lines);
+      _TTC_OnSetSelItem(wnd, selitem);
+      break;
+    }
+
+    /* move up 1 page */
+    case TVK_PRIOR:
+    {
+      selitem = _TTC_MovePrev(wnd, rc.lines);
+      _TTC_OnSetSelItem(wnd, selitem);
+      break;
+    }
+    
+    case TVK_RIGHT:
+    {
+      tc->shifted_right = TUI_MIN(rc.cols, tc->shifted_right+tc->shifted);
+      /* update item on the screen */
+      _TTC_FreshView(wnd);
+      break;
+    }
+    
+    case TVK_LEFT:
+    {
+      tc->shifted_right = TUI_MAX(0, tc->shifted_right-tc->shifted);
+      /* update item on the screen */
+      _TTC_FreshView(wnd);
+      break;
+    }
+
     default:
     {
        break;
@@ -852,6 +802,60 @@ TLONG _TTC_OnExpandItem(TWND wnd, TTREEITEM* item)
   _TTC_FreshView(wnd);
   return 0;
 }
+
+TINT  _TTC_OnGetIndentText(TWND wnd)
+{
+  TTREECTRLSTRUCT* tc  = 0;
+  
+  tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
+  return tc->indent;
+}
+
+TVOID _TTC_OnSetIndentText(TWND wnd, TINT indent)
+{
+  TTREECTRLSTRUCT* tc  = 0;
+  TRECT rc;
+  
+  TuiGetWndRect(wnd, &rc);
+  tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
+  if (indent < 2)
+  {
+    indent = 2;
+  }
+  else if (indent >= rc.cols)
+  {
+    indent = rc.cols - 1;
+  }
+  tc->indent = indent;
+}
+
+TINT  _TTC_OnGetShiftedText(TWND wnd)
+{
+  TTREECTRLSTRUCT* tc  = 0;
+  
+  tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
+  return tc->shifted;
+}
+
+TVOID _TTC_OnSetShiftedText(TWND wnd, TINT shifted)
+{
+  TTREECTRLSTRUCT* tc  = 0;
+  TRECT rc;
+  
+  TuiGetWndRect(wnd, &rc);
+  tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
+  if (shifted < 1)
+  {
+    shifted = 1;
+  }
+  else if (shifted >= rc.cols)
+  {
+    shifted = rc.cols - 1;
+  }
+  tc->shifted = shifted;
+}
+
+
 TVOID _TTC_OnExpandAllItems(TWND wnd)
 {
   TTREECTRLSTRUCT* tc  = 0;
@@ -1019,6 +1023,7 @@ TLONG _TTC_OnCreate(TWND wnd)
   memset(tc, 0, sizeof(_TTREECTRLSTRUCT));
   tc->indent = 2;
   tc->shifted_right = 0;
+  tc->shifted = 4;
   
   tc->tree = Tree_Create(0);
   if (!tc->tree)
@@ -1032,7 +1037,14 @@ TLONG _TTC_OnCreate(TWND wnd)
   return TUI_CONTINUE;
 }
 
-TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT maxlen, TBOOL file, TBOOL fullrow)
+TVOID _TTC_GetDisplayedText(
+  TWND wnd,
+  TUI_CHAR* outtext,
+  TTREEITEM* item,
+  TINT maxlen,
+  TBOOL file,
+  TBOOL fullrow
+)
 {
   TINT xpos = 0;
   TTREEITEMDATA data;
@@ -1046,8 +1058,8 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
   tc->tree->GetItemData(item, &data, sizeof(data));
   
-  memset(buf, ' ', sizeof(buf));
-  buf[BUFSIZ]  = 0;
+  memset(buf, 0, sizeof(buf));
+  /*buf[BUFSIZ]  = 0;*/
   xpos = tc->tree->GetLevel(item);
   /* fill indents */
   if (xpos > 0)
@@ -1059,6 +1071,7 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
     else
     {
       xpos *= tc->indent;
+      memset(buf, ' ', xpos);
     }
   }
   else
@@ -1086,23 +1099,7 @@ TVOID _TTC_GetDisplayText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT max
   {
     memcpy(&buf[xpos], data.itemtext, textlen);
   }
-
-  if (!fullrow)
-  {
-    if (maxlen > (textlen + xpos))
-    {
-      xpos += textlen;
-    }
-    else
-    {
-      xpos = maxlen-1;
-    }
-    buf[xpos] = 0;
-  }
-  else
-  {
-    xpos = maxlen-1;
-  }
+  xpos += textlen;
   /* copy to output */
   if (!file)
   {
@@ -1210,7 +1207,7 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
 
       memset(buf, filler, sizeof(buf));
       buf[TUI_MAX_WNDTEXT] = 0;
-      _TTC_GetDisplayText(wnd, buf, view.item, rc.cols, TUI_FALSE, fullrow);
+      _TTC_GetDisplayedText(wnd, buf, view.item, rc.cols, TUI_FALSE, fullrow);
       if (data.selected)
       {
         TuiDrawText(dc, y, rc.x, buf, highlight);
