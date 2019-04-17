@@ -546,6 +546,10 @@ do {\
 #define TTCM_IMPORTFROMFILE         (TTCM_FIRST +    13)
 #define TTCM_COLLAPSEALLITEMS       (TTCM_FIRST +    14)
 #define TTCM_EXPANDALLITEMS         (TTCM_FIRST +    15)
+#define TTCM_SETINDENTTEXT          (TTCM_FIRST +    16)
+#define TTCM_GETINDENTTEXT          (TTCM_FIRST +    17)
+#define TTCM_SETSHIFTEDTEXT         (TTCM_FIRST +    18)
+#define TTCM_GETSHIFTEDTEXT         (TTCM_FIRST +    19)
 
 /* Tree control notification messages */
 #define TTCN_ITEMCHANGING           (TTCN_FIRST +     0)
