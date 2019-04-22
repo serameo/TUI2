@@ -484,7 +484,7 @@ TTREEITEM* _TTC_MovePrev(TWND wnd, TLONG move_times)
   TRECT rc;
   TINT first_moves = 0;
   TINT cur_moves = 0;
-  TBOOL movefirst = TUI_TRUE;
+  TBOOL movefirst = TUI_FALSE;
 
   TuiGetWndRect(wnd, &rc);
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);

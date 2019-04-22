@@ -204,9 +204,11 @@ TLONG TuiDrawVFrames(TDC dc, TRECT* rcframe, TINT* widths, TINT nframes, TDWORD 
   /* frames */
   while (i < nframes-1)
   {
-    TuiPutChar(dc, rcframe->y, rcframe->x + widths[i], ACS_TTEE, attrs);
+    TuiPutChar(dc, rcframe->y, rcframe->x + widths[i], ACS_TTEE, attrs | A_ALTCHARSET);
     TuiDrawVLine(dc, rcframe->y+1, rcframe->x + widths[i], rcframe->lines-1, attrs);
-    TuiPutChar(dc, rcframe->y+rcframe->lines, rcframe->x + widths[i], ACS_BTEE, attrs);
+    TuiPutChar(dc, rcframe->y+rcframe->lines, rcframe->x + widths[i], ACS_BTEE, attrs | A_ALTCHARSET);
+    
+    rcframe->x += widths[i];
     ++i;
   }  
 #elif defined __USE_WIN32__
@@ -223,9 +225,11 @@ TLONG TuiDrawHFrames(TDC dc, TRECT* rcframe, TINT* heights, TINT nframes, TDWORD
   /* frames */
   while (i < nframes-1)
   {
-    TuiPutChar(dc, rcframe->y+heights[i], rcframe->x, ACS_LTEE, attrs);
+    TuiPutChar(dc, rcframe->y+heights[i], rcframe->x, ACS_LTEE, attrs | A_ALTCHARSET);
     TuiDrawHLine(dc, rcframe->y+heights[i], rcframe->x + 1, rcframe->cols-1, attrs);
-    TuiPutChar(dc, rcframe->y+heights[i], rcframe->x + rcframe->cols, ACS_RTEE, attrs);
+    TuiPutChar(dc, rcframe->y+heights[i], rcframe->x + rcframe->cols, ACS_RTEE, attrs | A_ALTCHARSET);
+    
+    rcframe->y += heights[i];
     ++i;
   }  
 #elif defined __USE_WIN32__
