@@ -267,6 +267,27 @@ enum /*THEME_STANDARD*/
   COLOR_LAST
 };
 
+#define TTY_COLOR_DEFAULT             "[39;49m"
+#define TTY_COLOR_BLACK               "[30;40m"
+#define TTY_COLOR_RED                 "[31;41m"
+#define TTY_COLOR_GREEN               "[32;42m"
+#define TTY_COLOR_YELLOW              "[33;43m"
+#define TTY_COLOR_BLUE                "[34;44m"
+#define TTY_COLOR_MAGENTA             "[35;45m"
+#define TTY_COLOR_CYAN                "[36;46m"
+#define TTY_COLOR_WHITE               "[37;47m"
+#define TTY_COLOR_BRIGHT_BLACK        "[90;100m"
+#define TTY_COLOR_BRIGHT_RED          "[91;101m"
+#define TTY_COLOR_BRIGHT_GREEN        "[92;102m"
+#define TTY_COLOR_BRIGHT_YELLOW       "[93;103m"
+#define TTY_COLOR_BRIGHT_BLUE         "[94;104m"
+#define TTY_COLOR_BRIGHT_MAGENTA      "[95;105m"
+#define TTY_COLOR_BRIGHT_CYAN         "[96;106m"
+#define TTY_COLOR_BRIGHT_WHITE        "[97;107m"
+
+#define TTY_ATTR_BOLD                 "[1m"
+#define TTY_ATTR_REVERSE              "[7m"
+#define TTY_ATTR_OFF                  "[0m"
 
 #ifdef __cplusplus
 }
