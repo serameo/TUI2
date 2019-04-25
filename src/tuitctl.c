@@ -1054,6 +1054,7 @@ TVOID _TTC_GetDisplayedText(
   TINT shifted_right = 0;
   TINT textlen = 0;
   TDWORD style = TuiGetWndStyle(wnd);
+  TLONG len = 0;
   
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
   tc->tree->GetItemData(item, &data, sizeof(data));
@@ -1106,6 +1107,13 @@ TVOID _TTC_GetDisplayedText(
     shifted_right = tc->shifted_right;
   }
   memcpy(outtext, &buf[shifted_right], xpos);
+  
+  len = strlen(outtext);
+  if (len < maxlen)
+  {
+    memset(&outtext[len], ' ', maxlen - len);
+    outtext[maxlen] = 0;
+  }
 }
 
 tui_i32 _TTC_ExpandAllItemsProc(tui_void* args, tree_iter_t item, const tui_void* node, tui_ui32 size)
@@ -1206,7 +1214,6 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
       tc->tree->GetItemData(view.item, &data, sizeof(TTREEITEMDATA));
 
       memset(buf, filler, sizeof(buf));
-      buf[TUI_MAX_WNDTEXT] = 0;
       _TTC_GetDisplayedText(wnd, buf, view.item, rc.cols, TUI_FALSE, fullrow);
       if (data.selected)
       {
