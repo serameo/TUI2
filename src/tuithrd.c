@@ -97,7 +97,7 @@ _Timer_SetEvent(
   TUI_BOOL      exit);
 
 
-
+/*------------------------------*/
 
 static
 TUI_VOID*
@@ -115,9 +115,9 @@ _Timer_TimerProc(TUI_VOID* arg)
   while (TUI_FALSE == attr->exit)
   {
     /* sleep in nano secs */
-    sec  = attr->timelapse/1000;
-    nsec = (attr->timelapse > sec*1000 ? 
-              (attr->timelapse - sec*1000)/1000000 : 0);
+    sec  = attr->timelapse/TTIMER_MILLISEC;
+    nsec = (attr->timelapse > sec*TTIMER_MILLISEC ? 
+              (attr->timelapse - sec*TTIMER_MILLISEC)/TTIMER_NANOSEC : 0);
     req.tv_sec  = sec;
     req.tv_nsec = nsec;
     memset(&rem, 0, sizeof(rem));

@@ -323,15 +323,15 @@ TLONG _TLC_OnKillFocus(TWND wnd)
   TNMHDR nmhdr;
   PTLISTCTRL lctl = 0;
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->movingstate == LCS_MOVINGCURSOR)
+  if (lctl->movingstate == TLCT_MOVINGCURSOR)
   {
     _TLC_OnEndMoving(wnd);
-    lctl->movingstate = LCS_VIEW;
+    lctl->movingstate = TLCT_VIEW;
   }
-  else if (lctl->editingstate == LCS_EDITING)
+  else if (lctl->editingstate == TLCT_EDITING)
   {
-    _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL);
-    lctl->editingstate = LCS_VIEW;
+    _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL);
+    lctl->editingstate = TLCT_VIEW;
   }
   /* send notification */
   nmhdr.id   = TuiGetWndID(wnd);
@@ -788,14 +788,14 @@ TVOID _TLC_OnBeginMoving(TWND wnd)
   TINT curselcol = -1;
     
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->movingstate == LCS_MOVINGCURSOR)
+  if (lctl->movingstate == TLCT_MOVINGCURSOR)
   {
     _TLC_OnEndMoving(wnd);
-    lctl->movingstate = LCS_VIEW;
+    lctl->movingstate = TLCT_VIEW;
     return;
   }
   
-  lctl->movingstate = LCS_MOVINGCURSOR;
+  lctl->movingstate = TLCT_MOVINGCURSOR;
   /* move cursor to the current row */
   curselcol = _TLC_FindHeaderIndex(lctl, lctl->firstvisiblehdr);
   /*lctl->curedtcol = _TLC_FindHeaderIndex(lctl, lctl->firstvisiblehdr);*/
@@ -851,7 +851,7 @@ TVOID _TLC_OnMovingCursor(TWND wnd, TLONG ch)
   TDWORD style = TuiGetWndStyle(wnd);
 
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->movingstate != LCS_MOVINGCURSOR)
+  if (lctl->movingstate != TLCT_MOVINGCURSOR)
   {
     return;
   }
@@ -962,7 +962,7 @@ TVOID _TLC_OnMovingCursor(TWND wnd, TLONG ch)
     /* save the editing cell */
     lctl->curedtcol = newcol;
     lctl->editingcell = cell;
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
     }
   }
@@ -977,11 +977,11 @@ TVOID _TLC_OnEndMoving(TWND wnd)
   TRECT rccell;
   
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->movingstate != LCS_MOVINGCURSOR)
+  if (lctl->movingstate != TLCT_MOVINGCURSOR)
   {
     return;
   }
-  lctl->movingstate = LCS_ENDMOVING;
+  lctl->movingstate = TLCT_ENDMOVING;
   
   /* redraw the previous moving cursor */
   header = _TLC_FindHeaderByIndex(lctl, lctl->curselcol);
@@ -998,8 +998,8 @@ TVOID _TLC_OnEndMoving(TWND wnd)
     0);
 
   /* update state */
-  lctl->movingstate   = LCS_VIEW;
-  /*lctl->editingstate  = LCS_VIEW;*/
+  lctl->movingstate   = TLCT_VIEW;
+  /*lctl->editingstate  = TLCT_VIEW;*/
   
   TuiInvalidateWnd(wnd);
   /* send notification */
@@ -1022,7 +1022,7 @@ TVOID  _TLC_OnBeginInsertRow(TWND wnd, TINT row)
   }
   /* save all cells on the row */
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  lctl->insertingstate = LCS_INSERTING;
+  lctl->insertingstate = TLCT_INSERTING;
   
   /* send notification */
   nmhdri.hdr.id   = TuiGetWndID(wnd);
@@ -1040,9 +1040,9 @@ TVOID  _TLC_OnEndInsertRow(TWND wnd, TINT row, TINT ok)
   PTLISTCTRL lctl = 0;
   
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  lctl->insertingstate = LCS_ENDINSERTING;
+  lctl->insertingstate = TLCT_ENDINSERTING;
   
-  if (LC_ENDEDITCANCEL == ok)
+  if (TLC_ENDEDITCANCEL == ok)
   {
     /* rollback */
     _TLC_OnDeleteItem(wnd, row);
@@ -1051,7 +1051,7 @@ TVOID  _TLC_OnEndInsertRow(TWND wnd, TINT row, TINT ok)
   /* send notification */
   nmhdri.hdr.id   = TuiGetWndID(wnd);
   nmhdri.hdr.ctl  = wnd;
-  nmhdri.hdr.code = (LC_ENDEDITOK == ok ?
+  nmhdri.hdr.code = (TLC_ENDEDITOK == ok ?
                       TLCN_ENDINSERTROWOK : TLCN_ENDINSERTROWCANCEL);
   nmhdri.row      = lctl->curselrow;
   nmhdri.col      = lctl->curselcol;
@@ -1113,7 +1113,7 @@ TVOID  _TLC_OnEndEditRow(TWND wnd, TINT row, TINT ok)
   TINT i = 0;
   
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (LC_ENDEDITCANCEL == ok)
+  if (TLC_ENDEDITCANCEL == ok)
   {
     /* rollback */
     nextcell = lctl->firsteditcell;
@@ -1139,7 +1139,7 @@ TVOID  _TLC_OnEndEditRow(TWND wnd, TINT row, TINT ok)
   /* send notification */
   nmhdri.hdr.id   = TuiGetWndID(wnd);
   nmhdri.hdr.ctl  = wnd;
-  nmhdri.hdr.code = (LC_ENDEDITOK == ok ?
+  nmhdri.hdr.code = (TLC_ENDEDITOK == ok ?
                       TLCN_ENDEDITROWOK : TLCN_ENDEDITROWCANCEL);
   nmhdri.row      = lctl->curselrow;
   nmhdri.col      = lctl->curselcol;
@@ -1162,7 +1162,7 @@ TVOID _TLC_OnBeginEdit(TWND wnd)
   }
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
 
-  lctl->editingstate = LCS_BEGINEDITING;
+  lctl->editingstate = TLCT_BEGINEDITING;
   /* show edit box at the current row and column */
   _TLC_GetCellRect(lctl->editingcell, &rccell);
   TuiMoveWnd(lctl->editbox, rccell.y, rccell.x, rccell.lines, rccell.cols);
@@ -1184,7 +1184,7 @@ TVOID _TLC_OnBeginEdit(TWND wnd)
   TuiSetFocus(lctl->editbox);
   
   /* update state */
-  lctl->editingstate = LCS_EDITING;
+  lctl->editingstate = TLCT_EDITING;
   
   /* send notification */
   nmhdri.hdr.id   = TuiGetWndID(wnd);
@@ -1211,11 +1211,11 @@ TVOID _TLC_OnEndEdit(TWND wnd, TINT ok)
     return;
   }
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->editingstate != LCS_EDITING)
+  if (lctl->editingstate != TLCT_EDITING)
   {
     return;
   }
-  lctl->editingstate = LCS_ENDEDITING;
+  lctl->editingstate = TLCT_ENDEDITING;
 
   /* hide edit box */
   rc = TuiSendMsg(lctl->editbox, TWM_KILLFOCUS, 0, 0);
@@ -1233,7 +1233,7 @@ TVOID _TLC_OnEndEdit(TWND wnd, TINT ok)
   /* send notification */
   nmhdri.hdr.id   = TuiGetWndID(wnd);
   nmhdri.hdr.ctl  = wnd;
-  nmhdri.hdr.code = (LC_ENDEDITOK == ok ?
+  nmhdri.hdr.code = (TLC_ENDEDITOK == ok ?
                       TLCN_ENDEDITOK : TLCN_ENDEDITCANCEL);
   nmhdri.row      = lctl->curselrow;
   nmhdri.col      = lctl->curselcol;
@@ -1248,7 +1248,7 @@ TVOID _TLC_OnChar(TWND wnd, TLONG ch)
   PTLISTCTRL lctl = 0;
   
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
-  if (lctl->editingstate == LCS_EDITING)
+  if (lctl->editingstate == TLCT_EDITING)
   {
     /* forward key entered to edit */
     TuiSendMsg(lctl->editbox, TWM_CHAR, (TWPARAM)ch, 0);
@@ -1266,7 +1266,7 @@ TINT _TLC_GetNextEditableCol(PTLISTCTRL lctl, TINT prevcol)
   TINT i = 0;
   for (i = prevcol+1; i < lctl->nheaders; ++i)
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
       if (lctl->editcols[i] != 0)
       {
@@ -1305,7 +1305,7 @@ TINT _TLC_GetPrevEditableCol(PTLISTCTRL lctl, TINT prevcol)
   TINT i = 0;
   for (i = prevcol-1; i>=0; --i)
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
       if (lctl->editcols[i] != 0)
       {
@@ -1346,17 +1346,17 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
   }
   if (ch == lctl->editkey && (style & TLCS_EDITABLE))
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
-      _TLC_OnEndEdit(wnd, LC_ENDEDITOK); /* edit ok */
+      _TLC_OnEndEdit(wnd, TLC_ENDEDITOK); /* edit ok */
       _TLC_OnEndMoving(wnd);
-      if (LCS_INSERTING == lctl->insertingstate)
+      if (TLCT_INSERTING == lctl->insertingstate)
       {
-        _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITOK);
+        _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITOK);
       }
       else
       {
-        _TLC_OnEndEditRow(wnd, row, LC_ENDEDITOK);
+        _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITOK);
       }
       return;
     }
@@ -1375,17 +1375,17 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
   }
   else if (ch == lctl->canceleditkey && (style & TLCS_EDITABLE))
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
-      _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+      _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
       _TLC_OnEndMoving(wnd);
-      if (LCS_INSERTING == lctl->insertingstate)
+      if (TLCT_INSERTING == lctl->insertingstate)
       {
-        _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+        _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
       }
       else
       {
-        _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+        _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
       }
       _TLC_OnSetCurRow(wnd, row-1);
     }
@@ -1393,17 +1393,17 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
   }
   else if (ch == lctl->insertkey && (style & TLCS_EDITABLE))
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
-      _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+      _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
       _TLC_OnEndMoving(wnd);
-      if (LCS_INSERTING == lctl->insertingstate)
+      if (TLCT_INSERTING == lctl->insertingstate)
       {
-        _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+        _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
       }
       else
       {
-        _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+        _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
       }
       _TLC_OnSetCurRow(wnd, row-1);
     }
@@ -1444,16 +1444,16 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
   }
   else if (ch == lctl->delkey)
   {
-    if (LCS_EDITING == lctl->editingstate)
+    if (TLCT_EDITING == lctl->editingstate)
     {
-      _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
-      _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+      _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
+      _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
       _TLC_OnEndMoving(wnd);
     }
-    else if (LCS_INSERTING == lctl->editingstate)
+    else if (TLCT_INSERTING == lctl->editingstate)
     {
-      _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
-      _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+      _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
+      _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
       _TLC_OnEndMoving(wnd);
     }
     _TLC_OnDeleteItem(wnd, row);
@@ -1476,9 +1476,9 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
   {
     case TVK_RIGHT:
     {
-      if (lctl->editingstate == LCS_EDITING)
+      if (lctl->editingstate == TLCT_EDITING)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITOK);
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITOK);
         _TLC_OnMovingCursor(wnd, ch);
         _TLC_OnBeginEdit(wnd);
       }
@@ -1492,9 +1492,9 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
 
     case TVK_LEFT:
     {
-      if (lctl->editingstate == LCS_EDITING)
+      if (lctl->editingstate == TLCT_EDITING)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITOK);
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITOK);
         _TLC_OnMovingCursor(wnd, ch);
         _TLC_OnBeginEdit(wnd);
       }
@@ -1508,18 +1508,18 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
 
     case TVK_DOWN:
     {
-      if (LCS_EDITING == lctl->editingstate)
+      if (TLCT_EDITING == lctl->editingstate)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
         /*_TLC_OnMovingCursor(wnd, ch);*/
         _TLC_OnEndMoving(wnd);
-        if (LCS_INSERTING == lctl->insertingstate)
+        if (TLCT_INSERTING == lctl->insertingstate)
         {
-          _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
         }
         else
         {
-          _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
         }
       }
       else
@@ -1533,18 +1533,18 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
 
     case TVK_UP:
     {
-      if (LCS_EDITING == lctl->editingstate)
+      if (TLCT_EDITING == lctl->editingstate)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
         /*_TLC_OnMovingCursor(wnd, ch);*/
         _TLC_OnEndMoving(wnd);
-        if (LCS_INSERTING == lctl->insertingstate)
+        if (TLCT_INSERTING == lctl->insertingstate)
         {
-          _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
         }
         else
         {
-          _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
         }
       }
       else
@@ -1557,18 +1557,18 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
       
     case TVK_PRIOR:
     {
-      if (LCS_EDITING == lctl->editingstate)
+      if (TLCT_EDITING == lctl->editingstate)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
         /*_TLC_OnMovingCursor(wnd, ch);*/
         _TLC_OnEndMoving(wnd);
-        if (LCS_INSERTING == lctl->insertingstate)
+        if (TLCT_INSERTING == lctl->insertingstate)
         {
-          _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
         }
         else
         {
-          _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
         }
       }
       else
@@ -1581,18 +1581,18 @@ TVOID _TLC_OnKeyDown(TWND wnd, TLONG ch)
     
     case TVK_NEXT:
     {
-      if (LCS_EDITING == lctl->editingstate)
+      if (TLCT_EDITING == lctl->editingstate)
       {
-        _TLC_OnEndEdit(wnd, LC_ENDEDITCANCEL); /* edit cancel */
+        _TLC_OnEndEdit(wnd, TLC_ENDEDITCANCEL); /* edit cancel */
         /*_TLC_OnMovingCursor(wnd, ch);*/
         _TLC_OnEndMoving(wnd);
-        if (LCS_INSERTING == lctl->insertingstate)
+        if (TLCT_INSERTING == lctl->insertingstate)
         {
-          _TLC_OnEndInsertRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndInsertRow(wnd, row, TLC_ENDEDITCANCEL);
         }
         else
         {
-          _TLC_OnEndEditRow(wnd, row, LC_ENDEDITCANCEL);
+          _TLC_OnEndEditRow(wnd, row, TLC_ENDEDITCANCEL);
         }
       }
       else
@@ -1661,9 +1661,9 @@ TLONG _TLC_OnSetItem(TWND wnd, TUINT flags, TSUBITEM* subitem)
   cell = _TLC_FindCellByIndex(lctl, subitem->col, subitem->idx);
   if (cell)
   {
-    if (flags & LCFM_TEXT)  { strcpy(cell->caption, subitem->text);  }
-    if (flags & LCFM_DATA)  { cell->data  = subitem->data;  }
-    if (flags & LCFM_ATTRS) { cell->attrs = subitem->attrs; }
+    if (flags & TLCFM_TEXT)  { strcpy(cell->caption, subitem->text);  }
+    if (flags & TLCFM_DATA)  { cell->data  = subitem->data;  }
+    if (flags & TLCFM_ATTRS) { cell->attrs = subitem->attrs; }
     rc = TUI_OK;
   }
   return rc;
@@ -1679,9 +1679,9 @@ TLONG _TLC_OnGetItem(TWND wnd, TUINT flags, TSUBITEM* subitem)
   cell = _TLC_FindCellByIndex(lctl, subitem->col, subitem->idx);
   if (cell)
   {
-    if (flags & LCFM_TEXT)  { subitem->text  = cell->caption;  }
-    if (flags & LCFM_DATA)  { subitem->data  = cell->data;  }
-    if (flags & LCFM_ATTRS) { subitem->attrs = cell->attrs; }
+    if (flags & TLCFM_TEXT)  { subitem->text  = cell->caption;  }
+    if (flags & TLCFM_DATA)  { subitem->data  = cell->data;  }
+    if (flags & TLCFM_ATTRS) { subitem->attrs = cell->attrs; }
     rc = TUI_OK;
   }
   return rc;
@@ -2029,7 +2029,7 @@ TVOID  _TLPC_OpenEditBox(TWND wnd, TINT row)
 */
   TLPC_SetEditStyle(wnd, row, editstyle);
   /* end editing from the previous */
-  _TLC_OnEndEdit(wnd, LC_ENDEDITOK);
+  _TLC_OnEndEdit(wnd, TLC_ENDEDITOK);
   
   _TLPC_OnSetCurRow(wnd, row);
   
@@ -2142,7 +2142,7 @@ TDWORD _TLPC_OnSetEditStyle(TWND wnd, TINT idx, TDWORD style)
 {
   PTLISTCTRL lctl = TuiGetWndParam(wnd);
   TDWORD oldstyle = 0;  
-  tlistcell_t* cell = _TLC_FindCellByIndex(lctl, HEADER_VALUE, idx);
+  tlistcell_t* cell = _TLC_FindCellByIndex(lctl, THEADER_VALUE, idx);
   if (cell)
   {
     oldstyle = cell->editstyle;
@@ -2158,7 +2158,7 @@ TDWORD _TLPC_OnGetEditStyle(TWND wnd, TINT idx)
   tlistcell_t* cell = 0;
 
   idx = lctl->curselrow;
-  cell = _TLC_FindCellByIndex(lctl, HEADER_VALUE, idx);
+  cell = _TLC_FindCellByIndex(lctl, THEADER_VALUE, idx);
   if (cell)
   {
     style = cell->editstyle;

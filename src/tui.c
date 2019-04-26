@@ -1699,7 +1699,7 @@ TLONG TuiPostMsg(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       }
       pthread_mutex_unlock(&env->queue_locked);
       /* resume thread */
-      TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TIMER_RESUME);
+      TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TTIMER_RESUME);
 
 
       return TUI_OK;    
@@ -2223,7 +2223,7 @@ TLONG _TuiDequeMsg()
   }
   pthread_mutex_unlock(&env->queue_locked);
   /* pause thread */
-  TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TIMER_SUSPEND);
+  TuiSetTimerEvent(TWND_DUMMY, TUI_DEQUEUE_ID, TTIMER_SUSPEND);
   return TUI_OK;
 }
 
@@ -2478,7 +2478,7 @@ TUI_LONG TuiKillTimer(TWND wnd, TUI_UINT32 id)
 TUI_LONG TuiSetTimerEvent(TWND wnd, TUI_UINT32 id, TUI_INT ev)
 {
   TENV env = TuiGetEnv();
-  if (TIMER_SUSPEND == ev)
+  if (TTIMER_SUSPEND == ev)
   {
     env->wndtimer->Suspend(env->wndtimer, wnd, id);
   }
