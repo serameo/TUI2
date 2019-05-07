@@ -67,7 +67,12 @@ TVOID _TTC_OnSetShiftedText(TWND wnd, TINT shifted);
 TVOID _TTC_FreshView(TWND wnd);
 /*typedef tui_i32         (*fn_tree_compare_proc)(const tui_void*, const tui_void*);*/
 tui_i32 _TTC_DefFindItemProc(const tui_void* datap, const tui_void* itemp);
-TVOID _TTC_GetDisplayedText(TWND wnd, TUI_CHAR* outtext, TTREEITEM* item, TINT maxlen, TBOOL file, TBOOL fullrow);
+TVOID _TTC_GetDisplayedText(
+  TWND wnd,
+  TUI_CHAR* outtext, TINT* startx, TINT* endx,
+  TTREEITEM* item,
+  TINT maxlen,
+  TBOOL file);
 
 TVOID _TTC_AdjustVisibleItems(TWND wnd);
 TTREEITEM* _TTC_MoveNext(TWND wnd, TLONG times);
@@ -235,6 +240,7 @@ TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc)
   TTREEITEMDATA data;
   TTREEVIEWITEM view;
   TTREEITEM* root = 0;
+  TINT startx = 0, endx = 0;
   
   if (!fp)
   {
@@ -264,7 +270,7 @@ TLONG _TTC_OnExportToFile(TWND wnd, FILE* fp, LPTREEEXPORTPROC prnproc)
     tc->tree->GetItemData(view.item, &data, sizeof(TTREEITEMDATA));
     
     memset(buf, 0, sizeof(buf));
-    _TTC_GetDisplayedText(wnd, buf, view.item, BUFSIZ-1, TUI_TRUE, TUI_FALSE);
+    _TTC_GetDisplayedText(wnd, buf, &startx, &endx, view.item, BUFSIZ-1, TUI_TRUE);
     
     if (prnproc)
     {
@@ -1039,12 +1045,10 @@ TLONG _TTC_OnCreate(TWND wnd)
 
 TVOID _TTC_GetDisplayedText(
   TWND wnd,
-  TUI_CHAR* outtext,
+  TUI_CHAR* outtext, TINT* startx, TINT* endx,
   TTREEITEM* item,
   TINT maxlen,
-  TBOOL file,
-  TBOOL fullrow
-)
+  TBOOL file)
 {
   TINT xpos = 0;
   TTREEITEMDATA data;
@@ -1074,6 +1078,7 @@ TVOID _TTC_GetDisplayedText(
       xpos *= tc->indent;
       memset(buf, ' ', xpos);
     }
+    *startx = xpos;
   }
   else
   {
@@ -1101,10 +1106,17 @@ TVOID _TTC_GetDisplayedText(
     memcpy(&buf[xpos], data.itemtext, textlen);
   }
   xpos += textlen;
+  
+  *endx = *startx + textlen;
   /* copy to output */
   if (!file)
   {
     shifted_right = tc->shifted_right;
+  }
+  if (shifted_right > 0)
+  {
+    *endx   = TUI_MAX(0, *endx - shifted_right);
+    *startx = TUI_MAX(0, *startx - shifted_right);
   }
   memcpy(outtext, &buf[shifted_right], xpos);
   
@@ -1171,6 +1183,7 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
   TDWORD style = 0;
   TUI_CHAR filler = 0;
   TUI_BOOL fullrow = TUI_FALSE;
+  TINT startx = 0, endx = 0;
   
   tc = (TTREECTRLSTRUCT*)TuiGetWndParam(wnd);
 
@@ -1187,7 +1200,7 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
     }
     if (TTCS_FULLSECROW & style)
     {
-      filler = ' ';
+      /*filler = ' ';*/
       fullrow = TUI_TRUE;
     }
 
@@ -1214,10 +1227,18 @@ TVOID _TTC_OnPaint(TWND wnd, TDC dc)
       tc->tree->GetItemData(view.item, &data, sizeof(TTREEITEMDATA));
 
       memset(buf, filler, sizeof(buf));
-      _TTC_GetDisplayedText(wnd, buf, view.item, rc.cols, TUI_FALSE, fullrow);
+      _TTC_GetDisplayedText(wnd, buf, &startx, &endx, view.item, rc.cols, TUI_FALSE);
       if (data.selected)
       {
-        TuiDrawText(dc, y, rc.x, buf, highlight);
+        if (fullrow)
+        {
+          TuiDrawText(dc, y, rc.x, buf, highlight);
+        }
+        else
+        {
+          buf[endx] = 0;
+          TuiDrawText(dc, y, rc.x + startx, &buf[startx], highlight);
+        }
         ysel = y;
         xsel = rc.x;
         strcpy(bufsel, buf);
