@@ -697,32 +697,32 @@ TLONG mylistctlproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       item.col   = 0;
       item.idx   = 0;
       item.attrs = TuiGetColor(GREEN_MAGENTA); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
       
       item.col   = 1;
       item.idx   = 1;
       item.attrs = TuiGetColor(YELLOW_BLUE); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
       
       item.col   = 2;
       item.idx   = 2;
       item.attrs = TuiGetColor(YELLOW_RED); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
       
       item.col   = 3;
       item.idx   = 3;
       item.attrs = TuiGetColor(GREEN_BLUE); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
       
       item.col   = 4;
       item.idx   = 4;
       item.attrs = TuiGetColor(CYAN_MAGENTA); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
 
       item.col   = 5;
       item.idx   = 14;
       item.attrs = TuiGetColor(CYAN_MAGENTA); 
-      TLC_SetItem(list, LCFM_ATTRS, &item);
+      TLC_SetItem(list, TLCFM_ATTRS, &item);
       
       return TuiDefFrameWndProc(wnd, msg, wparam, lparam);
     }
