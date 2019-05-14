@@ -17,7 +17,7 @@ struct _STACK_IMPL_STRUCT
   /* members */
   tui_i32     items;
   tui_i32     lparam;
-  tlist_t*     list;
+  tlist_t*    list;
 };
 typedef struct _STACK_IMPL_STRUCT stack_impl_t;
 
@@ -108,7 +108,7 @@ tui_i32
 stack_is_empty(tstack_t* stack)
 {
   tlist_t* list = ((stack_impl_t*)stack)->list;
-  return (0 >= list->Count(list));
+  return (0 == list->Count(list));
 }
 
 tui_i32

@@ -19,7 +19,7 @@ extern "C" {
 
 struct _TUIDDX_IMPL_STRUCT
 {
-  struct _TUIDDXSTRUCT   vtab;
+  struct _TUIDDXSTRUCT  vtab;
   TWND                  frmwnd;
   TUI_LPARAM            lparam;
   ddxctx_t*             ctx;    /* dynamic data exchange context */
@@ -184,7 +184,7 @@ TUI_INT32    ddx_update_data(tddx_t*, TUI_BOOL);
 TUI_VOID*    ddx_get_buffer(tddx_t*);
 TUI_UINT32   ddx_get_buffer_size(tddx_t*);
 TUI_UINT32   ddx_get_tag(tddx_t*);
-
+TUI_INT32    ddx_dump(tddx_t* ddx, FILE* fp);
 /*------------------------------*/
 
 tddx_t*
@@ -213,6 +213,7 @@ DDX_Create(
     impl->vtab.GetBuffer        = ddx_get_buffer;
     impl->vtab.GetBufferSize    = ddx_get_buffer_size;
     impl->vtab.GetTag           = ddx_get_tag;
+    impl->vtab.Dump             = ddx_dump;
   }
   return (tddx_t*)impl;
 }
@@ -264,6 +265,10 @@ ddx_update_data(
   TINT i;
   TUI_CHAR text[TUI_MAX_WNDTEXT+1];
   
+  if (0 == impl->frmwnd)
+  {
+      return 0;
+  }
   if (updscr)
   {
     /* update from buffer to screen */
@@ -298,7 +303,7 @@ ddx_load_to_buffer(
   TUI_VOID* buffer = 0;
   ddx_impl_t* impl = (ddx_impl_t*)ddx;
   /* check valid pointer */
-  if (!data && size <= 0)
+  if (!data && 0 == size)
   {
     return TUI_ERROR;
   }
@@ -315,9 +320,9 @@ ddx_load_to_buffer(
     free(impl->buffer);
     impl->buffer = 0;
   }
-  impl->buffer = buffer;
-  impl->size   = size;
-  impl->tag  = tag;
+  impl->buffer  = buffer;
+  impl->size    = size;
+  impl->tag     = tag;
   
   return rc;
 }
@@ -338,7 +343,6 @@ TUI_INT32    ddx_save_from_buffer(tddx_t* ddx, TUI_VOID* data, TUI_UINT32 size)
   return rc;
 }
 
-
 TUI_INT32    ddx_set_value(tddx_t* ddx, const TUI_CHAR* field, const TUI_CHAR* val)
 {
   TUI_INT32 rc = TUI_OK;
@@ -347,14 +351,16 @@ TUI_INT32    ddx_set_value(tddx_t* ddx, const TUI_CHAR* field, const TUI_CHAR* v
   ddxctx_t* ctx = _ddx_find_ctx(impl->ctx, field);
   
   /* lookup the specific field */
+  /*
   if (!ctx)
   {
     return TUI_ERROR;
   }
+  */
   
   /* check if the field required to validate */
   rc = TUI_CONTINUE;
-  if (ctx->validateproc)
+  if (impl->frmwnd && ctx && ctx->validateproc)
   {
     rc = ctx->validateproc(
             TuiGetWndItem(impl->frmwnd, ctx->id),
@@ -367,13 +373,14 @@ TUI_INT32    ddx_set_value(tddx_t* ddx, const TUI_CHAR* field, const TUI_CHAR* v
     tui_void* recp = impl->buffer;
     
     memset( &fld_prop, 0, sizeof ( BOS_DICTIONARY ) );
-    _ddx_find_field(impl->dic, field, &fld_prop);
-    
-    fldp = (tui_void*)( (size_t)recp + fld_prop.offset );
-    _ddx_copy_data(
-        fldp,
-        &fld_prop,
-        val);
+    if (DICT_OK == _ddx_find_field(impl->dic, field, &fld_prop))
+    {
+        fldp = (tui_void*)( (size_t)recp + fld_prop.offset );
+        _ddx_copy_data(
+            fldp,
+            &fld_prop,
+            val);
+    }
   }
   
   return rc;
@@ -388,17 +395,20 @@ TUI_INT32    ddx_get_value(tddx_t* ddx, const TUI_CHAR* field, TUI_CHAR* val)
   ddxctx_t* ctx = _ddx_find_ctx(impl->ctx, field);
     
   /* lookup the specific field */
+  /*
   if (!ctx)
   {
     return TUI_ERROR;
   }
+  */
   memset( &fld_prop, 0, sizeof ( BOS_DICTIONARY ) );
-  _ddx_find_field(impl->dic, field, &fld_prop);
-
-  _ddx_get_field(
-    impl->buffer,
-    &fld_prop,
-    val);
+  if (DICT_OK == _ddx_find_field(impl->dic, field, &fld_prop))
+  {
+    _ddx_get_field(
+      impl->buffer,
+      &fld_prop,
+      val);
+  }
   return rc;
 }
 
@@ -417,6 +427,10 @@ TUI_INT32    ddx_validate(tddx_t* ddx, const TUI_CHAR* field)
     return TUI_ERROR;
   }
   
+  if (0 == impl->frmwnd)
+  {
+    return rc;
+  }
   /* check if the field required to validate */
   if (ctx->validateproc)
   {
@@ -485,7 +499,47 @@ TUI_INT32    ddx_validate_all(tddx_t* ddx)
   return rc;
 }
 
+TUI_INT32 ddx_dump(tddx_t* ddx, FILE* fp)
+{
+  TUI_INT32 rc = TUI_CONTINUE;
+  ddx_impl_t* impl = (ddx_impl_t*)ddx;
+  dictlist_t* fld = 0;
+  std_dic_t* dic = impl->dic->GetDict(impl->dic);
+  tui_long  id_beg = ( 0 == impl->tag ? 0 : dic->nhdrs );
+  tui_long  id_end = ( 0 == impl->tag ? dic->nhdrs : dic->nflds );
+  tui_long  id = id_beg + 1;
+  TUI_CHAR buffer[BUFSIZ];
+  tui_void* recp = impl->buffer;
+  tui_void* fldp = 0;
 
+      
+  fld = dic->fld_first;
+  while ( fld ) /* loop though the required field */
+  {
+    if ( fld->fld_prop.id == id )
+    {
+      break;
+    }
+    /* find the next field */
+    fld = fld->next;
+  }
+  
+  while ( fld && fld->fld_prop.id <= id_end )
+  {
+    fldp = (tui_void*)( (size_t)recp + fld->fld_prop.offset );
+    _ddx_get_field(
+      fldp,
+      &fld->fld_prop,
+      buffer);
+    fprintf(fp, "%s: [%.*s]\n",
+      fld->fld_prop.name,
+      fld->fld_prop.size,
+      buffer);
+    /* print next field */
+    fld = fld->next;
+  }
+  return rc;
+}
 
 
 #ifdef __cplusplus

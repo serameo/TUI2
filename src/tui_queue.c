@@ -96,7 +96,7 @@ tui_i32
 queue_is_empty(tqueue_t* queue)
 {
   tlist_t* list = ((queue_impl_t*)queue)->list;
-  return (0 >= list->Count(list));
+  return (0 == list->Count(list));
 }
 
 node_t

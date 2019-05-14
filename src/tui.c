@@ -373,7 +373,7 @@ TLONG LISTPAGECTRLPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 TLONG TREECTRLPROC(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam);
 
 /*typedef TUI_VOID (*TUI_TIMERPROC)(TWND, TUI_UINT32, TUI_VOID*);*/
-TUI_VOID _Environment_TimerLookupPostMsgProc(TWND, TUI_UINT32, TUI_VOID*);
+TUI_VOID _Env_TimerLookupPostMsgProc(TWND, TUI_UINT32, TUI_VOID*);
 
 
 /*-------------------------------------------------------------------
@@ -381,7 +381,7 @@ TUI_VOID _Environment_TimerLookupPostMsgProc(TWND, TUI_UINT32, TUI_VOID*);
  *-----------------------------------------------------------------*/
 
 TUI_VOID
-_Environment_TimerLookupPostMsgProc(
+_Env_TimerLookupPostMsgProc(
   TWND        wnd,
   TUI_UINT32  id,
   TUI_VOID*   arg)
@@ -693,7 +693,7 @@ TLONG TuiStartup()
     
     env->wndtimer->SetTimer(env->wndtimer,
       TWND_DUMMY, TUI_DEQUEUE_ID, TUI_DEQUEUE_TIMEWAIT, /* deque posting messages every 3 secs */
-      TUI_TRUE, _Environment_TimerLookupPostMsgProc, env);
+      TUI_TRUE, _Env_TimerLookupPostMsgProc, env);
   }
     
   _TuiInitColors();

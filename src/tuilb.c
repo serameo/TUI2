@@ -309,7 +309,7 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
   TINT y, x; /* to move cursor */
   TINT ysel, xsel;
   TUI_CHAR  bufsel[TUI_MAX_WNDTEXT+1];
-  TDWORD attrssel;
+  TDWORD attrssel = TuiGetSysColor(COLOR_LBXTEXT);
   
   if (!TuiIsWndVisible(wnd))
   {
