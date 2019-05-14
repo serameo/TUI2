@@ -46,6 +46,7 @@ typedef TUI_INT32             (*fn_ddx_update_data)(tddx_t*, TUI_BOOL);
 typedef TUI_VOID*             (*fn_ddx_get_buffer)(tddx_t*);
 typedef TUI_UINT32            (*fn_ddx_get_buffer_size)(tddx_t*);
 typedef TUI_UINT32            (*fn_ddx_get_tag)(tddx_t*);
+typedef TUI_INT32             (*fn_ddx_dump)(tddx_t*, FILE*);
 
 struct _TUIDDXSTRUCT
 {
@@ -59,6 +60,7 @@ struct _TUIDDXSTRUCT
     fn_ddx_get_buffer         GetBuffer;
     fn_ddx_get_buffer_size    GetBufferSize;
     fn_ddx_get_tag            GetTag;
+    fn_ddx_dump               Dump;
 };
 
 #ifdef __cplusplus

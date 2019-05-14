@@ -312,6 +312,8 @@ struct _TUIDEVICECONTEXSTRUCT
 #elif defined __USE_WIN32__
   TVOID*      win;
   TVOID*      wout;
+#else
+  TVOID*      win;
 #endif
 };
 
