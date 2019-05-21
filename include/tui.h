@@ -1,6 +1,7 @@
 /*-------------------------------------------------------------------
  * File name: tui.h
  * Author: Seree Rakwong
+ * Email: meo.rakwong@gmail.com
  * Date: 28-SEP-18
  *-----------------------------------------------------------------*/
 #ifndef __TEXTUSERINTERFACE_H__
