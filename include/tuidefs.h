@@ -6,7 +6,9 @@
 #ifndef __TUI_DEFINES_H__
 #define __TUI_DEFINES_H__
 
+#ifdef __USE_CURSES__
 #include <curses.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -267,6 +269,7 @@ enum /*THEME_STANDARD*/
   COLOR_LAST
 };
 
+/* tty colors */
 #define TTY_COLOR_DEFAULT             "[39;49m"
 #define TTY_COLOR_BLACK               "[30;40m"
 #define TTY_COLOR_RED                 "[31;41m"
@@ -284,10 +287,22 @@ enum /*THEME_STANDARD*/
 #define TTY_COLOR_BRIGHT_MAGENTA      "[95;105m"
 #define TTY_COLOR_BRIGHT_CYAN         "[96;106m"
 #define TTY_COLOR_BRIGHT_WHITE        "[97;107m"
-
+/* tty attributes */
 #define TTY_ATTR_BOLD                 "[1m"
-#define TTY_ATTR_REVERSE              "[7m"
+#define TTY_ATTR_REVERSE              "[1;7m"
 #define TTY_ATTR_OFF                  "[0m"
+/* tty cursor */
+#define TTY_FMT_CURSOR_DD             "[%d;%dH"
+
+#define TTY_GOTO_LINE24               "[0;1m[24;H[K"   /* Set position at line 24 */
+#define TTY_SET_APPKEYS               "="                    /* Set keypad to application key*/
+#define TTY_SET_NUMKEYS               ">"                    /* Set keypad to numeric key */
+#define TTY_SET_NOSCROLL              "[?7l"                 /* Set no scrolling */
+#define TTY_ON_LINE25                 "?2$~?1$}"                /* Set line 25 to use */
+#define TTY_OFF_LINE25                "?0$}"                    /* Reset line 25 */
+#define TTY_OFF_CURSOR                "[?25l"                /* Set cursor off */
+#define TTY_ON_CURSOR                 "[?25h"                /* Set cursor on */
+
 
 
 /* windows */
@@ -339,6 +354,8 @@ enum /*THEME_STANDARD*/
 #define TWM_GETCURSOR           (TWM_FIRST +   24) /* get cursor          */
 #define TWM_SETCURSOR           (TWM_FIRST +   25) /* set cursor          */
 #define TWM_TIMER               (TWM_FIRST +   26) /* set timer           */
+#define TWM_TIMER_SUSPEND       (TWM_FIRST +   27) /* timer suspend       */
+#define TWM_TIMER_RESUME        (TWM_FIRST +   28) /* timer resume        */
 #define TWM_SHOWMSGBOX          (TWM_FIRST +  100) /* TuiDefFrameWndProc  */
 #define TWM_SHOWINPUTBOX        (TWM_FIRST +  101) /* TuiDefFrameWndProc  */
 #define TWM_SHOWLINEINPUTBOX    (TWM_FIRST +  102) /* TuiDefFrameWndProc  */

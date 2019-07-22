@@ -1,7 +1,6 @@
 /*-------------------------------------------------------------------
  * File name: tui.h
  * Author: Seree Rakwong
- * Email: meo.rakwong@gmail.com
  * Date: 28-SEP-18
  *-----------------------------------------------------------------*/
 #ifndef __TEXTUSERINTERFACE_H__
@@ -19,62 +18,6 @@
 extern "C" {
 #endif
 
-/*
- * TuiShowMsgBox()
- *    Show message box
- */
-TVOID TuiShowMsgBox(
-  TWND      wnd,
-  TUINT     id,               /* user defined TFM_USER + #no to handle this value in TWM_NOTIFY */
-  TLPCSTR   caption,
-  TLPCSTR   text,
-  TUINT     flags,            /* combination from MB_XXX  */
-  TINT      show);            /* TW_SHOW or TW_HIDE       */
-
-/*
- * TuiShowInputBox()
- *    Show dynamically input box
- */
-TVOID TuiShowInputBox(
-  TWND      wnd,
-  TUINT     id,
-  TLPCSTR   caption,
-  TLPCSTR   text,
-  TUINT     flags,
-  TINT      limit,            /* limit input    */
-  TDWORD    edtstyle,         /* TES_XXX        */
-  TLPCSTR   deftext,          /* default input  */
-  TINT      show);
-
-/*
- * TuiShowLineInputBox()
- *    Show dynamically input box but one line 1 character input
- */
-TVOID TuiShowLineInputBox(
-  TWND      wnd,
-  TUINT     id,
-  TINT      y,                /* y-position */
-  TINT      x,                /* x-position */
-  TLPCSTR   text,
-  TLPCSTR   deftext,
-  TLPCSTR   validch,          /* valid characters */
-  TINT      align,            /* DT_CENTER or 0   */
-  TINT      show);
-
-TVOID TuiShowPage(
-  TWND      wnd,
-  TINT      npage,
-  TINT      show
-);
-
-TVOID TuiSetCurPage(
-  TWND      wnd,
-  TINT      npage
-);
-
-TINT TuiGetCurPage(
-  TWND      wnd
-);
 
 /*-------------------------------------------------------------------
  * window functions
@@ -592,12 +535,61 @@ TLONG   TuiIsWndValidate(TWND wnd, TLPCSTR text);
  */
 VALIDATEPROC   TuiSetWndValidateProc(TWND wnd, VALIDATEPROC validateproc);
 /*
- * TuiSetWndShowInfoProc()
- *   Set window validate function
+ * TuiShowMsgBox()
+ *    Show message box
  */
-/* 
-SHOWINFOPROC   TuiSetWndShowInfoProc(TWND wnd, SHOWINFOPROC showinfoproc);
-*/
+TVOID TuiShowMsgBox(
+  TWND      wnd,
+  TUINT     id,               /* user defined TFM_USER + #no to handle this value in TWM_NOTIFY */
+  TLPCSTR   caption,
+  TLPCSTR   text,
+  TUINT     flags,            /* combination from MB_XXX  */
+  TINT      show);            /* TW_SHOW or TW_HIDE       */
+
+/*
+ * TuiShowInputBox()
+ *    Show dynamically input box
+ */
+TVOID TuiShowInputBox(
+  TWND      wnd,
+  TUINT     id,
+  TLPCSTR   caption,
+  TLPCSTR   text,
+  TUINT     flags,
+  TINT      limit,            /* limit input    */
+  TDWORD    edtstyle,         /* TES_XXX        */
+  TLPCSTR   deftext,          /* default input  */
+  TINT      show);
+
+/*
+ * TuiShowLineInputBox()
+ *    Show dynamically input box but one line 1 character input
+ */
+TVOID TuiShowLineInputBox(
+  TWND      wnd,
+  TUINT     id,
+  TINT      y,                /* y-position */
+  TINT      x,                /* x-position */
+  TLPCSTR   text,
+  TLPCSTR   deftext,
+  TLPCSTR   validch,          /* valid characters */
+  TINT      align,            /* DT_CENTER or 0   */
+  TINT      show);
+
+TVOID TuiShowPage(
+  TWND      wnd,
+  TINT      npage,
+  TINT      show
+);
+
+TVOID TuiSetCurPage(
+  TWND      wnd,
+  TINT      npage
+);
+
+TINT TuiGetCurPage(
+  TWND      wnd
+);
 
 /*
  * TuiPrintTextAlignment()

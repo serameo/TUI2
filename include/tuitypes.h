@@ -6,8 +6,16 @@
 #ifndef __TUI_TYPES_H__
 #define __TUI_TYPES_H__
 
+#ifdef __USE_CURSES__
 #include <curses.h>
+#endif
+
+#include <stdio.h>
 #include "tuidefs.h"
+
+#ifdef __USE_CURSES__
+#include "tuivms.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,7 +173,7 @@ struct _DRAWITEMSTRUCT
 };
 typedef struct _DRAWITEMSTRUCT TDRAWITEM;
 
-typedef TUI_VOID (*TUI_TIMERPROC)(TWND, TUI_UINT32, TUI_VOID*);
+typedef TUI_VOID (*TUI_TIMERPROC)(TWND wnd, TUI_UINT32 ev, TUI_UINT32 id, TUI_VOID* args);
 
 
 struct _WNDTEMPLSTRUCT
@@ -305,15 +313,31 @@ typedef tui_i32  (*LPTREEFINDITEMPROC)(const void*, const void*);
 typedef TLONG (*LPTREEEXPORTPROC)(FILE*, TTREEITEMDATA*);
 typedef TLONG (*LPTREEIMPORTPROC)(TTREEITEMDATA*, TLPCSTR);
 
+#ifdef __VMS__
+struct _iosb_term
+{
+  unsigned  short   status;    /* Return status */
+  unsigned  short   offset;    /* Return */
+  unsigned  short   terminator;/* Return terminate key ascii code */
+  unsigned  short   size;      /* No use */
+};
+typedef struct _iosb_term iosb_t;
+#endif
+
 struct _TUIDEVICECONTEXSTRUCT
 {
 #ifdef __USE_CURSES__
-  WINDOW*     win;
+  WINDOW*         win;
 #elif defined __USE_WIN32__
-  TVOID*      win;
-  TVOID*      wout;
+  TVOID*          win;
+  TVOID*          wout;
+#elif defined ( __USE_VMS__ ) || defined ( __VMS__ )
+  unsigned long   kbid; /* key board */
+  FILE*           win;
+  unsigned long   iochan;
+  iosb_t          iosb;
 #else
-  TVOID*      win;
+  TVOID*          win;
 #endif
 };
 
