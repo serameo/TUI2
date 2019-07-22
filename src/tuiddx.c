@@ -501,44 +501,64 @@ TUI_INT32    ddx_validate_all(tddx_t* ddx)
 
 TUI_INT32 ddx_dump(tddx_t* ddx, FILE* fp)
 {
-  TUI_INT32 rc = TUI_CONTINUE;
-  ddx_impl_t* impl = (ddx_impl_t*)ddx;
-  dictlist_t* fld = 0;
-  std_dic_t* dic = impl->dic->GetDict(impl->dic);
-  tui_long  id_beg = ( 0 == impl->tag ? 0 : dic->nhdrs );
-  tui_long  id_end = ( 0 == impl->tag ? dic->nhdrs : dic->nflds );
-  tui_long  id = id_beg + 1;
-  TUI_CHAR buffer[BUFSIZ];
-  tui_void* recp = impl->buffer;
-  tui_void* fldp = 0;
+    TUI_INT32 rc = TUI_CONTINUE;
+    ddx_impl_t* impl = (ddx_impl_t*) ddx;
+    dictlist_t* fld = 0;
+    std_dic_t* dic = impl->dic->GetDict(impl->dic);
+    tui_long id_beg = (0 == impl->tag ? 0 : dic->nhdrs);
+    tui_long id_end = (0 == impl->tag ? dic->nhdrs : dic->nflds);
+    tui_long id = id_beg + 1;
+    TUI_CHAR buffer[BUFSIZ];
+    tui_void* recp = impl->buffer;
+    tui_void* fldp = 0;
 
-      
-  fld = dic->fld_first;
-  while ( fld ) /* loop though the required field */
-  {
-    if ( fld->fld_prop.id == id )
+
+    fld = dic->fld_first;
+    while (fld) /* loop though the required field */
     {
-      break;
+        if (fld->fld_prop.id == id)
+        {
+            break;
+        }
+        /* find the next field */
+        fld = fld->next;
     }
-    /* find the next field */
-    fld = fld->next;
-  }
-  
-  while ( fld && fld->fld_prop.id <= id_end )
-  {
-    fldp = (tui_void*)( (size_t)recp + fld->fld_prop.offset );
-    _ddx_get_field(
-      fldp,
-      &fld->fld_prop,
-      buffer);
-    fprintf(fp, "%s: [%.*s]\n",
-      fld->fld_prop.name,
-      fld->fld_prop.size,
-      buffer);
-    /* print next field */
-    fld = fld->next;
-  }
-  return rc;
+
+    while (fld && fld->fld_prop.id <= id_end)
+    {
+        fldp = (tui_void*) ((size_t) recp + fld->fld_prop.offset);
+        _ddx_get_field(
+                       fldp,
+                       &fld->fld_prop,
+                       buffer);
+        switch (fld->fld_prop.type)
+        {
+            case DICT_HEX: /*= 'X' */
+            case DICT_BYTE: /*= 'B',*/
+            case DICT_INT: /*= 'I',*/
+            case DICT_LONG: /*= 'L',*/
+            case DICT_FLOAT: /*= 'F',*/
+            case DICT_DOUBLE: /*= 'D',*/
+            {
+                fprintf(fp, "%s: [%s]\n",
+                        fld->fld_prop.name,
+                        buffer);
+                break;
+            }
+            case DICT_CHAR: /*= 'C',*/
+            default:
+            {
+                fprintf(fp, "%s: [%.*s]\n",
+                        fld->fld_prop.name,
+                        fld->fld_prop.size,
+                        buffer);
+                break;
+            }
+        }
+        /* print next field */
+        fld = fld->next;
+    }
+    return rc;
 }
 
 

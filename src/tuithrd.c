@@ -11,6 +11,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "tui.h"
 #include "tuithrd.h"
@@ -105,8 +106,10 @@ _Timer_TimerProc(TUI_VOID* arg)
 {
   timer_attr_t* attr = (timer_attr_t*)arg;
   timer_impl_t* impl = (timer_impl_t*)attr->timer;
+#ifndef __VMS__
   struct timespec req;
   struct timespec rem;
+#endif
   tui_ui32 sec  = 0;
   tui_ui32 nsec = 0;
   TWND frame = 0;
@@ -114,15 +117,18 @@ _Timer_TimerProc(TUI_VOID* arg)
   /* infinite */
   while (TUI_FALSE == attr->exit)
   {
-    /* sleep in nano secs */
     sec  = attr->timelapse/TTIMER_MILLISEC;
     nsec = (attr->timelapse > sec*TTIMER_MILLISEC ? 
               (attr->timelapse - sec*TTIMER_MILLISEC)/TTIMER_NANOSEC : 0);
+#ifdef __VMS__
+    usleep(nsec);
+#else
+    /* sleep in nano secs */
     req.tv_sec  = sec;
     req.tv_nsec = nsec;
     memset(&rem, 0, sizeof(rem));
     nanosleep(&req, &rem);
-
+#endif
     if (TUI_FALSE == attr->paused)
     {
       frame = TuiGetWndFrame(TuiGetActiveWnd());
@@ -130,7 +136,7 @@ _Timer_TimerProc(TUI_VOID* arg)
       {
         if (attr->timerproc)
         {
-            attr->timerproc(attr->wnd, attr->id, attr->arg);
+            attr->timerproc(attr->wnd, TWM_TIMER, attr->id, attr->arg);
         }
         else
         {
@@ -141,7 +147,11 @@ _Timer_TimerProc(TUI_VOID* arg)
       {
         if (attr->timerproc)
         {
-            attr->timerproc(attr->wnd, attr->id, attr->arg);
+            attr->timerproc(attr->wnd, TWM_TIMER, attr->id, attr->arg);
+        }
+        else
+        {
+            TuiPostMsg(attr->wnd, TWM_TIMER, (TWPARAM)attr->id, (TLPARAM)attr->arg);
         }
       }
     }
@@ -192,7 +202,29 @@ _Timer_SetEvent(
   attr = (timer_attr_t*)impl->timers->GetItemPointer(iter);
   attr->exit   = exit;
   attr->paused = paused;
-  
+  if (paused)
+  {
+        if (attr->timerproc)
+        {
+            attr->timerproc(attr->wnd, TWM_TIMER_SUSPEND, attr->id, attr->arg);
+        }
+        else
+        {
+            TuiPostMsg(attr->wnd, TWM_TIMER_SUSPEND, (TWPARAM)attr->id, (TLPARAM)attr->arg);
+        }
+  }
+  else
+  {
+        if (attr->timerproc)
+        {
+            attr->timerproc(attr->wnd, TWM_TIMER_RESUME, attr->id, attr->arg);
+        }
+        else
+        {
+            TuiPostMsg(attr->wnd, TWM_TIMER_RESUME, (TWPARAM)attr->id, (TLPARAM)attr->arg);
+        }
+  }
+
   return TUI_OK;
 }
 
@@ -248,7 +280,7 @@ timer_set_timer(
   TUI_UINT32    id,
   TUI_UINT32    timelapse,
   TUI_BOOL      paused,
-  TUI_TIMERPROC    proc,
+  TUI_TIMERPROC proc,
   TUI_VOID*     arg)
 {
   pthread_attr_t thrdattr;

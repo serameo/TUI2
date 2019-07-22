@@ -857,7 +857,7 @@ TVOID _TEDT_OnPaint(TWND wnd, TDC dc)
     }
     else
     {
-      TuiDrawText(dc, rc.y, rc.x, buf, TuiGetSysColor(COLOR_EDTTEXT));
+      TuiDrawText(dc, rc.y, rc.x, text, TuiGetSysColor(COLOR_EDTTEXT));
     }
     TuiMoveYX(dc, rc.y, rc.x);
   }

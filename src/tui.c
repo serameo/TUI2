@@ -1,7 +1,6 @@
 /*-------------------------------------------------------------------
  * File name: tui.c
  * Author: Seree Rakwong
- * Email: meo.rakwong@gmail.com
  * Date: 17-SEP-18
  *-----------------------------------------------------------------*/
 #include <stdlib.h>
@@ -13,6 +12,8 @@
 #include <curses.h>
 #elif defined __USE_WIN32__
 #include <windows.h>
+#elif defined __VMS__
+#include "tuivms.h"
 #endif
 
 #include "tui.h"
@@ -106,8 +107,12 @@ struct _TUIWINDOWSTRUCT
 #ifdef __USE_CURSES__
   WINDOW*           win;
 #elif defined __USE_WIN32__
-  HANDLE            win;  /* input */
+  HANDLE            win;  /* input  */
   HANDLE            wout; /* output */
+#elif defined __USE_VMS__
+  TUI_UINT32        kbid; /* key board    */
+  FILE*             win;
+  TUI_UINT32        iochan;
 #endif
   TDWORD            attrs;
   TDWORD            themeattrs;
@@ -514,6 +519,19 @@ TVOID _TuiClearScreen(TDC dc)
     /* Put the cursor at its home coordinates.*/
 
     SetConsoleCursorPosition(dc->wout, coordScreen);
+#elif defined __USE_VMS__
+  int row;
+  TUI_CHAR szLine[VMS_COLUMNS+1];
+  
+  memset(szLine, 0, sizeof(szLine));
+  memset(szLine, ' ', VMS_COLUMNS);
+  fprintf(dc->win, TTY_ATTR_OFF);
+  
+  for (row = 0; row < VMS_ROWS; ++row)
+  {
+    fprintf(dc->win, TTY_FMT_CURSOR_DD, row, 0);
+    fprintf(dc->win, szLine);
+  }
 #endif
 }
 
@@ -687,6 +705,20 @@ TLONG TuiStartup()
 
     env->dc.wout = GetStdHandle(STD_OUTPUT_HANDLE);
     _TuiClearScreen(&env->dc);
+#elif defined __USE_VMS__
+    long status = SS$_NORMAL;
+    memset(&env->dc, 0, sizeof(env->dc));
+    
+    status = vms_get_sysio(&env->dc.iochan, "sys$input");
+    if (status != SS$_NORMAL)
+    {
+      free(genvptr);
+      return TUI_ERROR;
+    }
+    
+    smg$create_virtual_keyboard(&env->dc.kbid);
+    env->dc.win = stdout;
+    _TuiClearScreen(&env->dc);
 #endif
     env->wndtimer = Timer_Create(0);
     
@@ -784,6 +816,17 @@ TDC TuiGetDC(TWND wnd)
   {
       dc.win = wnd->win;
       dc.wout = wnd->wout;
+  }
+  else
+  {
+      dc = TuiGetEnv()->dc;
+  }
+#elif defined __USE_VMS__
+  if (wnd)
+  {
+      dc.kbid   = wnd->kbid;
+      dc.win = wnd->win;
+      dc.iochan = wnd->iochan;
   }
   else
   {
@@ -909,6 +952,10 @@ TWND _TuiCreateWndEx(
 #elif defined __USE_WIN32__
       wnd->win  = env->dc.win;
       wnd->wout = env->dc.wout;
+#elif defined __USE_VMS__
+      wnd->kbid   = env->dc.kbid;
+      wnd->win = env->dc.win;
+      wnd->iochan = env->dc.iochan;
 #endif
       wnd->attrs   = 0;
 
@@ -1034,6 +1081,10 @@ TWND _TuiCreateWnd(
 #elif defined __USE_WIN32__
       wnd->win  = env->dc.win;
       wnd->wout = env->dc.wout;
+#elif defined __USE_VMS__
+      wnd->kbid   = env->dc.kbid;
+      wnd->win = env->dc.win;
+      wnd->iochan = env->dc.iochan;
 #endif
       wnd->attrs   = 0;
 
@@ -2036,6 +2087,7 @@ TWND TuiGetParent(TWND wnd)
  * MSG functions
  *-----------------------------------------------------------------*/
 
+
 TLONG  TuiGetChar()
 {
 #if defined __USE_CURSES__
@@ -2063,6 +2115,9 @@ TLONG  TuiGetChar()
             }
         }
     }
+#elif defined __USE_VMS__
+    TENV env = TuiGetEnv();
+  return (TLONG)vms_getch(&env->dc.kbid);
 #endif
   return 0;
 }
