@@ -331,7 +331,7 @@ struct _TUIDEVICECONTEXSTRUCT
 #elif defined __USE_WIN32__
   TVOID*          win;
   TVOID*          wout;
-#elif defined ( __USE_VMS__ ) || defined ( __VMS__ )
+#elif defined ( __USE_TTY__ ) || defined ( __VMS__ )
   unsigned long   kbid; /* key board */
   FILE*           win;
   unsigned long   iochan;

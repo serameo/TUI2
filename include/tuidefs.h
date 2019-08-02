@@ -6,10 +6,6 @@
 #ifndef __TUI_DEFINES_H__
 #define __TUI_DEFINES_H__
 
-#ifdef __USE_CURSES__
-#include <curses.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,7 +46,20 @@ extern "C" {
 #define TVK_INSERT         KEY_IC
 #define TVK_DELETE         KEY_DC
 #define TVK_HELP           KEY_HELP
-#else /* __USE_CURSES__*/
+#elif defined __USE_TTY__
+#define TVK_BACK           0x7F
+#define TVK_PRIOR          0x139
+#define TVK_NEXT           0x13C
+#define TVK_END            0x13B
+#define TVK_HOME           0x138
+#define TVK_LEFT           0x114
+#define TVK_UP             0x112
+#define TVK_RIGHT          0x115
+#define TVK_DOWN           0x113
+#define TVK_INSERT         0x137
+#define TVK_DELETE         0x13A
+#define TVK_HELP           0x2F
+#else
 #define TVK_BACK           0x08
 #define TVK_PRIOR          0x21
 #define TVK_NEXT           0x22
@@ -65,6 +74,25 @@ extern "C" {
 #define TVK_HELP           0x2F
 #endif /* __USE_CURSES__*/
 
+#ifdef __USE_TTY__
+#define TVK_ESCAPE         0x1B
+#define TVK_NUMPAD0        0x104
+#define TVK_NUMPAD1        0x105
+#define TVK_NUMPAD2        0x106
+#define TVK_NUMPAD3        0x107
+#define TVK_NUMPAD4        0x108
+#define TVK_NUMPAD5        0x109
+#define TVK_NUMPAD6        0x10a
+#define TVK_NUMPAD7        0x10b
+#define TVK_NUMPAD8        0x10c
+#define TVK_NUMPAD9        0x10d
+#define TVK_MULTIPLY       0x102
+#define TVK_ADD            0x110
+#define TVK_SEPARATOR      0x16C
+#define TVK_SUBTRACT       0x103
+#define TVK_DECIMAL        0x111
+#define TVK_DIVIDE         0x101
+#else
 #define TVK_ESCAPE         0x1B
 #define TVK_NUMPAD0        0x60
 #define TVK_NUMPAD1        0x61
@@ -82,6 +110,8 @@ extern "C" {
 #define TVK_SUBTRACT       0x6D
 #define TVK_DECIMAL        0x6E
 #define TVK_DIVIDE         0x6F
+#endif
+
 #ifdef __USE_CURSES__
 #define TVK_F1             KEY_F(1)
 #define TVK_F2             KEY_F(2)
@@ -107,6 +137,31 @@ extern "C" {
 #define TVK_F22            KEY_F(22)
 #define TVK_F23            KEY_F(23)
 #define TVK_F24            KEY_F(24)
+#elif defined __USE_TTY__
+#define TVK_F1             0x119
+#define TVK_F2             0x11a
+#define TVK_F3             0x11b
+#define TVK_F4             0x11c
+#define TVK_F5             0x11d
+#define TVK_F6             0x11e
+#define TVK_F7             0x11f
+#define TVK_F8             0x120
+#define TVK_F9             0x121
+#define TVK_F10            0x122
+#define TVK_F11            0x123
+#define TVK_F12            0x124
+#define TVK_F13            0x125
+#define TVK_F14            0x126
+#define TVK_F15            0x127
+#define TVK_F16            0x128
+#define TVK_F17            0x129
+#define TVK_F18            0x12a
+#define TVK_F19            0x12b
+#define TVK_F20            0x12c
+#define TVK_F21            0x123
+#define TVK_F22            0x124
+#define TVK_F23            0x125
+#define TVK_F24            0x126
 #else /* __USE_CURSES__ */
 #define TVK_F1             0x70
 #define TVK_F2             0x71
@@ -151,6 +206,20 @@ extern "C" {
 #define TUI_MAX(a, b)       ((a) > (b) ? (a) : (b))
 
 #define TUI_DEQUEUE_TIMEWAIT      (3000)
+
+
+#if defined __USE_WIN32__
+#define FOREGROUND_BLACK        (0)
+#define FOREGROUND_YELLOW       (FOREGROUND_GREEN | FOREGROUND_RED)
+#define FOREGROUND_MAGENTA      (FOREGROUND_BLUE  | FOREGROUND_RED)
+#define FOREGROUND_CYAN         (FOREGROUND_GREEN | FOREGROUND_BLUE)
+#define FOREGROUND_WHITE        (FOREGROUND_GREEN | FOREGROUND_RED | BACKGROUND_BLUE)
+#define BACKGROUND_BLACK        (0)
+#define BACKGROUND_YELLOW       (BACKGROUND_GREEN | BACKGROUND_RED)
+#define BACKGROUND_MAGENTA      (BACKGROUND_BLUE  | BACKGROUND_RED)
+#define BACKGROUND_CYAN         (BACKGROUND_GREEN | BACKGROUND_BLUE)
+#define BACKGROUND_WHITE        (BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE)
+#endif
 
 /* colors */
 enum
@@ -269,6 +338,9 @@ enum /*THEME_STANDARD*/
   COLOR_LAST
 };
 
+/*
+ * http://ascii-table.com/ansi-escape-sequences-vt-100.php
+ */
 /* tty colors */
 #define TTY_COLOR_DEFAULT             "[39;49m"
 #define TTY_COLOR_BLACK               "[30;40m"
@@ -287,23 +359,162 @@ enum /*THEME_STANDARD*/
 #define TTY_COLOR_BRIGHT_MAGENTA      "[95;105m"
 #define TTY_COLOR_BRIGHT_CYAN         "[96;106m"
 #define TTY_COLOR_BRIGHT_WHITE        "[97;107m"
+
+#define TTY_MAKECOLOR(fg, bg)         (((fg)&0xff) | (((bg)&0xff)<<16))
+#define TTY_FGCOLOR(cl)               ((cl)&0xff)
+#define TTY_BGCOLOR(cl)               (((cl)>>16)&0xff)
+#define TTY_FOREGROUND_BLACK          30
+#define TTY_FOREGROUND_RED            31
+#define TTY_FOREGROUND_GREEN          32
+#define TTY_FOREGROUND_YELLOW         33
+#define TTY_FOREGROUND_BLUE           34
+#define TTY_FOREGROUND_MAGENTA        35
+#define TTY_FOREGROUND_CYAN           36
+#define TTY_FOREGROUND_WHITE          37
+#define TTY_BACKGROUND_BLACK          40
+#define TTY_BACKGROUND_RED            41
+#define TTY_BACKGROUND_GREEN          42
+#define TTY_BACKGROUND_YELLOW         43
+#define TTY_BACKGROUND_BLUE           44
+#define TTY_BACKGROUND_MAGENTA        45
+#define TTY_BACKGROUND_CYAN           46
+#define TTY_BACKGROUND_WHITE          47
+#define TTY_FMT_COLOR_LL              "[%d;%dm"
+
+#define TTY_COLOR_BLACK_BLACK         "[30;40m"
+#define TTY_COLOR_BLACK_RED           "[30;41m"
+#define TTY_COLOR_BLACK_GREEN         "[30;42m"
+#define TTY_COLOR_BLACK_YELLOW        "[30;43m"
+#define TTY_COLOR_BLACK_BLUE          "[30;44m"
+#define TTY_COLOR_BLACK_MAGENTA       "[30;45m"
+#define TTY_COLOR_BLACK_CYAN          "[30;46m"
+#define TTY_COLOR_BLACK_WHITE         "[30;47m"
+#define TTY_COLOR_RED_BLACK           "[31;40m"
+#define TTY_COLOR_RED_RED             "[31;41m"
+#define TTY_COLOR_RED_GREEN           "[31;42m"
+#define TTY_COLOR_RED_YELLOW          "[31;43m"
+#define TTY_COLOR_RED_BLUE            "[31;44m"
+#define TTY_COLOR_RED_MAGENTA         "[31;45m"
+#define TTY_COLOR_RED_CYAN            "[31;46m"
+#define TTY_COLOR_RED_WHITE           "[31;47m"
+#define TTY_COLOR_GREEN_BLACK         "[32;40m"
+#define TTY_COLOR_GREEN_RED           "[32;41m"
+#define TTY_COLOR_GREEN_GREEN         "[32;42m"
+#define TTY_COLOR_GREEN_YELLOW        "[32;43m"
+#define TTY_COLOR_GREEN_BLUE          "[32;44m"
+#define TTY_COLOR_GREEN_MAGENTA       "[32;45m"
+#define TTY_COLOR_GREEN_CYAN          "[32;46m"
+#define TTY_COLOR_GREEN_WHITE         "[32;47m"
+#define TTY_COLOR_YELLOW_BLACK        "[33;40m"
+#define TTY_COLOR_YELLOW_RED          "[33;41m"
+#define TTY_COLOR_YELLOW_GREEN        "[33;42m"
+#define TTY_COLOR_YELLOW_YELLOW       "[33;43m"
+#define TTY_COLOR_YELLOW_BLUE         "[33;44m"
+#define TTY_COLOR_YELLOW_MAGENTA      "[33;45m"
+#define TTY_COLOR_YELLOW_CYAN         "[33;46m"
+#define TTY_COLOR_YELLOW_WHITE        "[33;47m"
+#define TTY_COLOR_BLUE_BLACK          "[34;40m"
+#define TTY_COLOR_BLUE_RED            "[34;41m"
+#define TTY_COLOR_BLUE_GREEN          "[34;42m"
+#define TTY_COLOR_BLUE_YELLOW         "[34;43m"
+#define TTY_COLOR_BLUE_BLUE           "[34;44m"
+#define TTY_COLOR_BLUE_MAGENTA        "[34;45m"
+#define TTY_COLOR_BLUE_CYAN           "[34;46m"
+#define TTY_COLOR_BLUE_WHITE          "[34;47m"
+#define TTY_COLOR_MAGENTA_BLACK       "[35;40m"
+#define TTY_COLOR_MAGENTA_RED         "[35;41m"
+#define TTY_COLOR_MAGENTA_GREEN       "[35;42m"
+#define TTY_COLOR_MAGENTA_YELLOW      "[35;43m"
+#define TTY_COLOR_MAGENTA_BLUE        "[35;44m"
+#define TTY_COLOR_MAGENTA_MAGENTA     "[35;45m"
+#define TTY_COLOR_MAGENTA_CYAN        "[35;46m"
+#define TTY_COLOR_MAGENTA_WHITE       "[35;47m"
+#define TTY_COLOR_CYAN_BLACK          "[36;40m"
+#define TTY_COLOR_CYAN_RED            "[36;41m"
+#define TTY_COLOR_CYAN_GREEN          "[36;42m"
+#define TTY_COLOR_CYAN_YELLOW         "[36;43m"
+#define TTY_COLOR_CYAN_BLUE           "[36;44m"
+#define TTY_COLOR_CYAN_MAGENTA        "[36;45m"
+#define TTY_COLOR_CYAN_CYAN           "[36;46m"
+#define TTY_COLOR_CYAN_WHITE          "[36;47m"
+#define TTY_COLOR_WHITE_BLACK         "[37;40m"
+#define TTY_COLOR_WHITE_RED           "[37;41m"
+#define TTY_COLOR_WHITE_GREEN         "[37;42m"
+#define TTY_COLOR_WHITE_YELLOW        "[37;43m"
+#define TTY_COLOR_WHITE_BLUE          "[37;44m"
+#define TTY_COLOR_WHITE_MAGENTA       "[37;45m"
+#define TTY_COLOR_WHITE_CYAN          "[37;46m"
+#define TTY_COLOR_WHITE_WHITE         "[37;47m"
 /* tty attributes */
-#define TTY_ATTR_BOLD                 "[1m"
-#define TTY_ATTR_REVERSE              "[1;7m"
 #define TTY_ATTR_OFF                  "[0m"
-/* tty cursor */
-#define TTY_FMT_CURSOR_DD             "[%d;%dH"
+#define TTY_ATTR_BOLD                 "[1m"
+#define TTY_ATTR_LOW_INTENSITY        "[2m"
+#define TTY_ATTR_UNDERSCORE           "[4m"
+#define TTY_ATTR_BLINK                "[5m"
+#define TTY_ATTR_REVERSE              "[7m"
+#define TTY_ATTR_INVISIBLE            "[8m"
+#define TTY_ATTR_BOLD_REVERSE         "[1;7m"
+/* dynamic tty color */
+#define TTY_FMT_CURSOR_LL             "[%d;%dH"
 
 #define TTY_GOTO_LINE24               "[0;1m[24;H[K"   /* Set position at line 24 */
 #define TTY_SET_APPKEYS               "="                    /* Set keypad to application key*/
 #define TTY_SET_NUMKEYS               ">"                    /* Set keypad to numeric key */
 #define TTY_SET_NOSCROLL              "[?7l"                 /* Set no scrolling */
-#define TTY_ON_LINE25                 "?2$~?1$}"                /* Set line 25 to use */
-#define TTY_OFF_LINE25                "?0$}"                    /* Reset line 25 */
+#define TTY_ON_LINE25                 "2$~1$}"            /* Set line 25 to use */
+#define TTY_OFF_LINE25                "0$}"                  /* Reset line 25 */
 #define TTY_OFF_CURSOR                "[?25l"                /* Set cursor off */
 #define TTY_ON_CURSOR                 "[?25h"                /* Set cursor on */
+#define TTY_GET_CURPOS                "6n"                   /* Get cursor position */
 
+#define TTY_CLEAR_LINE                "2K"                   /* Clear entire line */
+#define TTY_CLEAR_SCREEN              "2J"                   /* Clear entire scren */
+#define TTY_SAVE_CURPOS               "[s"                   /* Save Cursor Position */
+#define TTY_RESTORE_CURPOS            "[u"                   /* Restore Cursor Position */
 
+#define TTY_SET_MODE_40X25_MONO_TEXT            "[=0h"
+#define TTY_SET_MODE_40X25_COLOR_TEXT           "[=1h"
+#define TTY_SET_MODE_80X25_MONO_TEXT            "[=2h"
+#define TTY_SET_MODE_80X25_COLOR_TEXT           "[=3h"
+#define TTY_SET_MODE_320X200_4COLOR_GRAPHIC     "[=4h"
+#define TTY_SET_MODE_320X200_MONO_GRAPHIC       "[=5h"
+#define TTY_SET_MODE_640X200_MONO_GRAPHIC       "[=6h"
+#define TTY_SET_MODE_LINE_WRAPPING              "[=7h"
+#define TTY_SET_MODE_320X200_COLOR_GRAPHIC      "[=13h"
+#define TTY_SET_MODE_640X200_16COLOR_GRAPHIC    "[=14h"
+#define TTY_SET_MODE_640X350_MONO_GRAPHIC       "[=15h"
+#define TTY_SET_MODE_640X350_16COLOR_GRAPHIC    "[=16h"
+#define TTY_SET_MODE_640X480_MONO_GRAPHIC       "[=17h"
+#define TTY_SET_MODE_640X480_16COLOR_GRAPHIC    "[=18h"
+#define TTY_SET_MODE_320X200_256COLOR_GRAPHIC   "[=19h"
+
+#define TTY_RESET_MODE_40X25_MONO_TEXT            "[=0l"
+#define TTY_RESET_MODE_40X25_COLOR_TEXT           "[=1l"
+#define TTY_RESET_MODE_80X25_MONO_TEXT            "[=2l"
+#define TTY_RESET_MODE_80X25_COLOR_TEXT           "[=3l"
+#define TTY_RESET_MODE_320X200_4COLOR_GRAPHIC     "[=4l"
+#define TTY_RESET_MODE_320X200_MONO_GRAPHIC       "[=5l"
+#define TTY_RESET_MODE_640X200_MONO_GRAPHIC       "[=6l"
+#define TTY_RESET_MODE_LINE_WRAPPING              "[=7l"
+#define TTY_RESET_MODE_320X200_COLOR_GRAPHIC      "[=13l"
+#define TTY_RESET_MODE_640X200_16COLOR_GRAPHIC    "[=14l"
+#define TTY_RESET_MODE_640X350_MONO_GRAPHIC       "[=15l"
+#define TTY_RESET_MODE_640X350_16COLOR_GRAPHIC    "[=16l"
+#define TTY_RESET_MODE_640X480_MONO_GRAPHIC       "[=17l"
+#define TTY_RESET_MODE_640X480_16COLOR_GRAPHIC    "[=18l"
+#define TTY_RESET_MODE_320X200_256COLOR_GRAPHIC   "[=19l"
+
+#if defined __REFLECTION__ || defined __HALTERM__
+#define TTY_PRNSCR                    = "›i"
+#define TTY_PRNLINE                   = "›1i"
+#define TTY_STOP_PRN                  = "›4i"
+#define TTY_START_PRN                 = "›5i"
+#elif defined __USE_TTY__
+#define TTY_PRNSCR                    = "[i"
+#define TTY_PRNLINE                   = "[1i"
+#define TTY_STOP_PRN                  = "[4i"
+#define TTY_START_PRN                 = "[5i"
+#endif
 
 /* windows */
 #define TALIGN_LEFT             0

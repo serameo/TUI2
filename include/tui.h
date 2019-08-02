@@ -9,7 +9,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifdef __USE_CURSES__
 #include <curses.h>
+#elif defined __USE_WIN32__
+#include <windows.h>
+#elif defined __VMS__
+#include "tuivms.h"
+#endif
 
 #include "tuidefs.h"
 #include "tuitypes.h"
