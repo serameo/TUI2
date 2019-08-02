@@ -5,6 +5,8 @@
  *-----------------------------------------------------------------*/
 #ifdef __VMS__
 #include "tuivms.h"
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {

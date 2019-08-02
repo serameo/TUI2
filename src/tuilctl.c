@@ -7,10 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef __USE_CURSES__
-#include <curses.h>
-#endif
-
 #include "tui.h"
 
 /*-------------------------------------------------------------------
@@ -640,6 +636,7 @@ TVOID _TLC_OnPaint(TWND wnd, TDC dc)
   TINT i = 0;
   TINT forcewidth = 0;
   TDWORD style = TuiGetWndStyle(wnd);
+  TDWORD highlight = TuiGetSysColor(COLOR_HIGHLIGHTED);
 
   lctl = (PTLISTCTRL)TuiGetWndParam(wnd);
   
@@ -682,7 +679,7 @@ TVOID _TLC_OnPaint(TWND wnd, TDC dc)
     }
 
     hdrattrs = header->attrs;
-    attrs = TuiReverseColor(header->attrs);
+    attrs = header->attrs;/*TuiReverseColor(header->attrs);*/
 
     if (!(style & TLCS_NOHEADER))
     {
@@ -717,7 +714,11 @@ TVOID _TLC_OnPaint(TWND wnd, TDC dc)
         attrs = visiblecell->attrs;
         if (!(TLCS_NOSELECTION & style) && i == lctl->curselrow)
         {
+#if defined __USE_CURSES__ || defined __USE_WIN32__
           attrs = TuiReverseColor(attrs);
+#else
+          attrs = highlight;
+#endif
         }
         /* draw th item that it can be seen */
         _TLC_DrawItem(dc, &rccell, 

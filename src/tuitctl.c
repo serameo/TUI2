@@ -7,10 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef __USE_CURSES__
-#include <curses.h>
-#endif
-
 #include "tui.h"
 #include "tui_tree.h"
 #include "tui_queue.h"
@@ -358,7 +354,7 @@ TVOID _TTC_AdjustVisibleItems(TWND wnd)
   {
     if (tc->visibleitems)
     {
-      List_Destroy(tc->visibleitems);        
+      List_Destroy(tc->visibleitems);
     }
     tc->visibleitems = items;
   }
@@ -802,7 +798,7 @@ TLONG _TTC_OnExpandItem(TWND wnd, TTREEITEM* item)
   
   
   nmhdr.hdr.code = TTCN_ITEMEXPANDED;
-  TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);  
+  TuiPostMsg(TuiGetParent(wnd), TWM_NOTIFY, 0, (TLPARAM)&nmhdr);
 
   /* update item on the screen */
   _TTC_FreshView(wnd);

@@ -354,9 +354,9 @@ TLONG _TEDT_OnKillFocus(TWND wnd)
   TLONG rcminmax = TUI_CONTINUE;
   TINT number = 0;
   TRECT rcwnd;
-  TuiGetWndRect(wnd, &rcwnd);
   TPOS pos;
   
+  TuiGetWndRect(wnd, &rcwnd);
   edit = (TEDIT)TuiGetWndParam(wnd);
   edit->firstvisit = 1;
   

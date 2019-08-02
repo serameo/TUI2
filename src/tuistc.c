@@ -41,14 +41,11 @@ TVOID _TSTC_OnPaint(TWND wnd, TDC dc)
     TuiPrintTextAlignment(buf, text, rc.cols, TuiGetWndStyle(wnd));
     
     attrs = TuiGetWndTextAttrs(wnd);
-    if (attrs)
+    if (0 == attrs)
     {
-        TuiDrawText(dc, rc.y, rc.x, buf, attrs);
+        attrs = TuiGetSysColor(COLOR_WNDTEXT);
     }
-    else
-    {
-        TuiDrawText(dc, rc.y, rc.x, buf, TuiGetSysColor(COLOR_WNDTEXT));
-    }
+    TuiDrawText(dc, rc.y, rc.x, buf, attrs);
   }
 }
 

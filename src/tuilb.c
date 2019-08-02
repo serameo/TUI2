@@ -7,10 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef __USE_CURSES__
-#include <curses.h>
-#endif
-
 #include "tui.h"
 
 /*-------------------------------------------------------------------
@@ -197,46 +193,31 @@ TVOID _TLB_OnKeyDown(TWND wnd, TLONG ch)
       ++repaint;
       break;
     }
-#if defined __USE_CURSES__
-    case KEY_DOWN:
-#elif defined __USE_WIN32__
+
     case TVK_DOWN:
-#endif
 /*    case KEY_RIGHT:*/
     {
       ++lines;
       ++repaint;
       break;
     }
-  
-#if defined __USE_CURSES__
-    case KEY_UP:
-#elif defined __USE_WIN32__
+
     case TVK_UP:
-#endif
 /*    case KEY_LEFT:*/
     {
       --lines;
       ++repaint;
       break;
     }
-      
-#ifdef __USE_CURSES__
-    case KEY_PPAGE:
-#elif defined __USE_WIN32__
+
     case TVK_PRIOR:
-#endif
     {
       lines -= rc.lines;
       ++repaint;
       break;
     }
     
-#ifdef __USE_CURSES__
-    case KEY_NPAGE:
-#elif defined __USE_WIN32__
     case TVK_NEXT:
-#endif
     {
       lines += rc.lines;
       ++repaint;
@@ -396,7 +377,7 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
                   rc.y + (i - lb->firstvisible),
                   rc.x,
                   buf,
-                  TuiGetSysColor(COLOR_HIGHLIGHTED));
+                  attrssel);
             }
 #elif defined __USE_WIN32__
             attrssel = TuiGetSysColor(COLOR_HIGHLIGHTED);
@@ -404,7 +385,14 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
                 rc.y + (i - lb->firstvisible),
                 rc.x,
                 buf,
-                TuiGetSysColor(COLOR_HIGHLIGHTED));
+                attrssel);
+#else
+            attrssel = TuiGetSysColor(COLOR_HIGHLIGHTED);
+            TuiDrawText(dc,
+                rc.y + (i - lb->firstvisible),
+                rc.x,
+                buf,
+                attrssel);
 #endif
           }
           else
@@ -426,12 +414,12 @@ TVOID _TLB_OnPaint(TWND wnd, TDC dc)
                 buf, 
                 TuiGetSysColor(COLOR_LBXTEXT));
             }
-#elif defined __USE_WIN32__
+#else
             TuiDrawText(dc,
-                  rc.y + (i - lb->firstvisible),
-                  rc.x,
-                  buf,
-                  TuiGetSysColor(COLOR_LBXTEXT));
+                rc.y + (i - lb->firstvisible),
+                rc.x,
+                buf,
+                TuiGetSysColor(COLOR_LBXTEXT));
 #endif
           }
         }

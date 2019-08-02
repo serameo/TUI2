@@ -52,8 +52,8 @@ WNDTEMPL dlg3[] =
   /* 1st object is always dialog */
   { "mytreectlproc", "Dialog3", 2,  0,  0, 25, 80, TWS_WINDOW, 0 },
   /* 2nd and others are controls */
-  { TTREECTRL, "",    IDC_TREECTRL1,  0,  0,  16,  80, 
-    TWS_CHILD|TWS_VISIBLE/*|TTCS_FULLSECROW/*|TTCS_NOHIGHLIGHT*/, 0 },
+  { TTREECTRL, "",    IDC_TREECTRL1,  0,  0,  16,  40, 
+    TWS_CHILD|TWS_VISIBLE|TTCS_SHOWNODE|TTCS_FULLSECROW/*|TTCS_NOHIGHLIGHT*/, 0 },
   { TBUTTON, "Print",    IDC_PRINT,  20,  20,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
   { TBUTTON, "Close",    IDC_CLOSE,  20,  40,  1,  15, TWS_CHILD|TWS_VISIBLE, 0 },
   /* the last is the end-of-controls */
@@ -137,7 +137,7 @@ TVOID mywndproc_onselchanged(TWND wnd, TWND ctl)
   }
 }
 
-TVOID mywndproc_onmbxcommand(TWND wnd, TUINT cmd, TUINT id)
+TVOID mywndproc_onmsgboxcommand(TWND wnd, TUINT cmd, TUINT id)
 {
   TWND statusbar = 0;
   TTCHAR buf[TUI_MAX_WNDTEXT+1];
@@ -207,11 +207,11 @@ TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
       edit = TuiGetWndItem(wnd, IDC_NAME);
       TuiSendMsg(edit, TEM_LIMITTEXT, (TWPARAM)20, (TLPARAM)0);
       
-      statusbar = TuiGetWndItem(wnd, IDC_STATUSBAR);
+      statusbar = TuiGetWndItem(wnd, IDC_STATUSBAR);/*
       TuiSendMsg(statusbar,
         TWM_SETTEXTATTRS, 
         (TWPARAM)TuiGetColor(BLACK_YELLOW),
-        (TLPARAM)0);
+        (TLPARAM)0);*/
      /* 
       edit = TuiGetWndItem(wnd, IDC_PASSWORD);
       TEDT_ShowPasswdChar(edit, TW_HIDE);*/
@@ -232,15 +232,17 @@ TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
         case (TWM_USER+1):
         {
           /*RESPONSEMSGBOX* res = (RESPONSEMSGBOX*)lparam;*/
-          mywndproc_onmbxcommand(wnd, nmhdr->id, nmhdr->code);
+          mywndproc_onmsgboxcommand(wnd, nmhdr->id, nmhdr->code);
           break;
         }
         case TCN_DISPLAYINFO:
         {
           DISPLAYINFO* di = (DISPLAYINFO*)nmhdr;
           mywndproc_ondisplayinfo(wnd, di);
+          /*
           statusbar = TuiGetWndItem(wnd, IDC_STATUSBAR);
           TuiSetWndText(statusbar, di->text);
+          */
           break;
         }
       }
@@ -251,7 +253,7 @@ TLONG mywndproc(TWND wnd, TUINT msg, TWPARAM wparam, TLPARAM lparam)
     case TWM_MBXCOMMAND:
     {
       RESPONSEMSGBOX* res = (RESPONSEMSGBOX*)lparam;
-      mywndproc_onmbxcommand(wnd, res->cmd, res->id);
+      mywndproc_onmsgboxcommand(wnd, res->cmd, res->id);
       break;
     }*/
     
@@ -478,7 +480,7 @@ TLONG mytreectlproc_oninit(TWND wnd)
   
   fclose(fp);
   
-  TTC_ExpandAllItems(tctl);
+  /*TTC_ExpandAllItems(tctl);*/
   
   return TUI_CONTINUE;
 }

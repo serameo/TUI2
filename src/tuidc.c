@@ -7,14 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef __USE_CURSES__
-#include <curses.h>
-#elif defined __USE_WIN32__
-#include <windows.h>
-#elif defined __VMS__
-#include "tuivms.h"
-#endif
-
 #include "tui.h"
 
 /*-------------------------------------------------------------------
@@ -31,53 +23,8 @@ TLONG TuiPutChar(
   TUI_CHAR   ch,
   TDWORD  attrs)
 {
-#if defined __USE_CURSES__
-  /* set attributes on */
-  attron(attrs);
-  /* print now */
-  if (y >= LINES)
-  {
-    y = LINES - 1;
-  }
-  if (x >= COLS)
-  {
-    x = COLS - 1;
-  }
-  mvwaddch(dc->win, y, x, ch);
-  /* set attributes off */
-  attroff(attrs);
-#elif defined __USE_WIN32__
-  DWORD dwWritten = 0;
-  COORD coord;
-  coord.X = x;
-  coord.Y = y;
-  FillConsoleOutputAttribute(dc->wout, attrs, 1, coord, &dwWritten);
-  FillConsoleOutputCharacter(dc->wout, ch, 1, coord, &dwWritten);
-#elif defined __USE_VMS__
-  TUI_CHAR sz[TUI_MAX_WNDTEXT+1];
-  TUI_CHAR pos[TUI_MAX_WNDTEXT+1];
-  TUI_CHAR at[TUI_MAX_WNDTEXT+1] = "";
-
-  if (attrs)
-  {
-    strcpy(at, TTY_ATTR_REVERSE);
-  }
-  if (y >= VMS_ROWS)
-  {
-    y = VMS_ROWS - 1;
-  }
-  if (x >= VMS_COLUMNS)
-  {
-    x = VMS_COLUMNS - 1;
-  }
-  sprintf(pos, TTY_FMT_CURSOR_DD, y, x);
-  sprintf(sz, "\0x27[%d;%dH%c\0x27[0m", y, x, ch); 
-  
-  vms_writeio(dc->iochan, &dc->iosb, sz, strlen(sz));
-  
-  /*fprintf(dc->win, sz);*/
-#endif
-  return TUI_OK;
+  TUI_CHAR text[2] = { ch, 0 };
+  return TuiDrawText(dc, y, x, text, attrs);
 }
 
 TLONG TuiDrawText(
@@ -92,9 +39,18 @@ TLONG TuiDrawText(
   {
     y = LINES - 1;
   }
+  else if (y < 0)
+  {
+      y = 0;
+  }
+
   if (x >= COLS)
   {
     x = COLS - 1;
+  }
+  else if (x < 0)
+  {
+      x = 0;
   }
   /* set attributes on */
   attron(attrs);
@@ -111,29 +67,40 @@ TLONG TuiDrawText(
   SetConsoleTextAttribute(dc->wout, attrs);
   WriteConsole(dc->wout, text, strlen(text), &dwWritten, 0);
   SetConsoleTextAttribute(dc->wout, csbi.wAttributes);
-#elif defined __USE_VMS__
-  TUI_CHAR sz[TUI_MAX_WNDTEXT+1];
-  TUI_CHAR pos[TUI_MAX_WNDTEXT+1];
-  TUI_CHAR at[TUI_MAX_WNDTEXT+1] = "";
+#elif defined __USE_TTY__
+  TUI_CHAR sz[2*TUI_MAX_WNDTEXT+1];
+  TUI_CHAR at[2*TUI_MAX_WNDTEXT+1] = "";
+  TLONG  fg = 0;
+  TLONG  bg = 0;
 
-  if (attrs)
-  {
-    strcpy(at, TTY_ATTR_REVERSE);
-  }
   if (y >= VMS_ROWS)
   {
     y = VMS_ROWS - 1;
+  }
+  else if (y < 0)
+  {
+      y = 0;
   }
   if (x >= VMS_COLUMNS)
   {
     x = VMS_COLUMNS - 1;
   }
-  sprintf(pos, TTY_FMT_CURSOR_DD, y, x);
-  sprintf(sz, "\0x27[%d;%dH%s\0x27[0m", y, x, text); 
+  else if (x < 0)
+  {
+      x = 0;
+  }
+  sprintf(sz, TTY_FMT_CURSOR_LL, y, x);
+  if (attrs)
+  {
+    fg = TTY_FGCOLOR(attrs);
+    bg = TTY_BGCOLOR(attrs);
+    sprintf(at, TTY_FMT_COLOR_LL, fg, bg);
+    strcat(sz, at);
+  }
+  strcat(sz, text);
+  strcat(sz, TTY_ATTR_OFF);
   
   vms_writeio(dc->iochan, &dc->iosb, sz, strlen(sz));
-  
-  /*fprintf(dc->win, sz);*/
 #endif
   return TUI_OK;
 }
@@ -149,7 +116,7 @@ TLONG TuiMoveYX(TDC dc, TINT y, TINT x)
     coord.Y = y;
 
     SetConsoleCursorPosition(dc->wout, coord);
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
   TUI_CHAR sz[TUI_MAX_WNDTEXT+1];
   TUI_CHAR pos[TUI_MAX_WNDTEXT+1];
 
@@ -161,7 +128,7 @@ TLONG TuiMoveYX(TDC dc, TINT y, TINT x)
   {
     x = VMS_COLUMNS - 1;
   }
-  sprintf(pos, TTY_FMT_CURSOR_DD, y, x);
+  sprintf(pos, TTY_FMT_CURSOR_LL, y, x);
   sprintf(sz, "%s", pos);
   vms_writeio(dc->iochan, &dc->iosb, sz, strlen(sz));
 #endif
@@ -179,7 +146,10 @@ TLONG TuiGetYX(TDC dc, TINT* y, TINT* x)
   GetConsoleScreenBufferInfo(dc->wout, &csbi);
   xx = csbi.dwCursorPosition.X;
   yy = csbi.dwCursorPosition.Y;
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
+  TUI_CHAR pos[TUI_MAX_WNDTEXT+1];
+  sprintf(pos, TTY_FMT_CURSOR_LL, y, x);
+  vms_writeio(dc->iochan, &dc->iosb, pos, strlen(pos));
 #endif
   *y = yy;
   *x = xx;
@@ -225,7 +195,7 @@ TLONG TuiDrawBorder(TDC dc, TRECT* rcwnd)
   /* lower right */
   mvwaddch(dc->win, rcwnd->y + rcwnd->lines, rcwnd->x + rcwnd->cols, ACS_LRCORNER);
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
@@ -240,7 +210,7 @@ TLONG TuiDrawBorderEx(TDC dc, TRECT* rcwnd, TDWORD attrs)
 #if defined __USE_CURSES__
   attroff(attrs);
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
@@ -253,7 +223,7 @@ TLONG TuiDrawHLine(TDC dc, TINT y, TINT x, TINT nchars, TDWORD attrs)
   mvwhline(dc->win, y, x, ACS_HLINE, nchars);
   attroff(attrs);
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
@@ -266,7 +236,7 @@ TLONG TuiDrawVLine(TDC dc, TINT y, TINT x, TINT nchars, TDWORD attrs)
   mvwvline(dc->win, y, x, ACS_VLINE, nchars);
   attroff(attrs);
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
@@ -288,7 +258,7 @@ TLONG TuiDrawVFrames(TDC dc, TRECT* rcframe, TINT* widths, TINT nframes, TDWORD 
     ++i;
   }  
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
@@ -310,7 +280,7 @@ TLONG TuiDrawHFrames(TDC dc, TRECT* rcframe, TINT* heights, TINT nframes, TDWORD
     ++i;
   }  
 #elif defined __USE_WIN32__
-#elif defined __USE_VMS__
+#elif defined __USE_TTY__
 #endif
   return TUI_OK;
 }
