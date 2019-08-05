@@ -714,11 +714,7 @@ TVOID _TLC_OnPaint(TWND wnd, TDC dc)
         attrs = visiblecell->attrs;
         if (!(TLCS_NOSELECTION & style) && i == lctl->curselrow)
         {
-#if defined __USE_CURSES__ || defined __USE_WIN32__
           attrs = TuiReverseColor(attrs);
-#else
-          attrs = highlight;
-#endif
         }
         /* draw th item that it can be seen */
         _TLC_DrawItem(dc, &rccell, 

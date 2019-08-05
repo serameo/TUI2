@@ -101,7 +101,7 @@ struct _TUIWINDOWSTRUCT
 #elif defined __USE_WIN32__
   HANDLE            win;  /* input  */
   HANDLE            wout; /* output */
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
   TUI_UINT32        kbid; /* key board    */
   FILE*             win;
   TUI_UINT32        iochan;
@@ -451,7 +451,7 @@ TDWORD _TuiColorPair(TINT idx)
     {
         idx = 0;
     }
-#ifdef __USE_TTY__
+#ifdef __USE_VMS__
     return TTY_MAKECOLOR(gcolors[idx].fg, gcolors[idx].bg);
 #else
     return (gcolors[idx].fg | gcolors[idx].bg);
@@ -464,7 +464,7 @@ TDWORD _TuiReverseColorPair(TINT idx)
     {
         idx = 0;
     }
-#ifdef __USE_TTY__
+#ifdef __USE_VMS__
     return TTY_MAKECOLOR(gcolors[idx].rfg, gcolors[idx].rbg);
 #else
     return (gcolors[idx].rfg | gcolors[idx].rbg);
@@ -521,7 +521,7 @@ TVOID _TuiClearScreen(TDC dc)
     /* Put the cursor at its home coordinates.*/
 
     SetConsoleCursorPosition(dc->wout, coordScreen);
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
 /*
   int row;
   TUI_CHAR szLine[VMS_COLUMNS+1];
@@ -674,7 +674,7 @@ TVOID _TuiInitColors()
   _TuiInitPair(WHITE_MAGENTA,   FOREGROUND_WHITE,       BACKGROUND_MAGENTA, FOREGROUND_MAGENTA, BACKGROUND_WHITE);
   _TuiInitPair(WHITE_CYAN,      FOREGROUND_WHITE,       BACKGROUND_CYAN,    FOREGROUND_CYAN,    BACKGROUND_WHITE);
   _TuiInitPair(WHITE_WHITE,     FOREGROUND_WHITE,       BACKGROUND_WHITE,   FOREGROUND_WHITE,   BACKGROUND_WHITE);
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
   _TuiInitPair(BLACK_BLACK,     TTY_FOREGROUND_BLACK,   TTY_BACKGROUND_BLACK,   TTY_FOREGROUND_BLACK,   TTY_BACKGROUND_BLACK);
   _TuiInitPair(BLACK_RED,       TTY_FOREGROUND_BLACK,   TTY_BACKGROUND_RED,     TTY_FOREGROUND_RED,     TTY_BACKGROUND_BLACK);
   _TuiInitPair(BLACK_GREEN,     TTY_FOREGROUND_BLACK,   TTY_BACKGROUND_GREEN,   TTY_FOREGROUND_GREEN,   TTY_BACKGROUND_BLACK);
@@ -745,7 +745,7 @@ TVOID _TuiInitColors()
 TLONG TuiStartup()
 {
   TENV env = (TENV)malloc(sizeof(_TENV));
-#if defined __USE_TTY__
+#if defined __USE_VMS__
   TLONG status = SS$_NORMAL;
 #endif
   if (env)
@@ -783,7 +783,7 @@ TLONG TuiStartup()
 
     env->dc.wout = GetStdHandle(STD_OUTPUT_HANDLE);
     _TuiClearScreen(&env->dc);
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
     memset(&env->dc, 0, sizeof(env->dc));
     
     status = vms_get_sysio(&env->dc.iochan, "sys$input");
@@ -899,7 +899,7 @@ TDC TuiGetDC(TWND wnd)
   {
       dc = TuiGetEnv()->dc;
   }
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
   if (wnd)
   {
       dc.kbid   = wnd->kbid;
@@ -1030,7 +1030,7 @@ TWND _TuiCreateWndEx(
 #elif defined __USE_WIN32__
       wnd->win  = env->dc.win;
       wnd->wout = env->dc.wout;
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
       wnd->kbid   = env->dc.kbid;
       wnd->win = env->dc.win;
       wnd->iochan = env->dc.iochan;
@@ -1062,7 +1062,7 @@ TWND _TuiCreateWndEx(
         wnd->x = x;
         wnd->lines = lines;
         wnd->cols = cols;
-#elif __USE_TTY__
+#elif __USE_VMS__
         wnd->y       = (y > 0 && y < VMS_ROWS ? y : 0);
         wnd->x       = (x > 0 && x < VMS_COLUMNS  ? x : 0);
         wnd->lines   = (lines > 0 && lines < VMS_ROWS     ? lines : VMS_ROWS);
@@ -1164,7 +1164,7 @@ TWND _TuiCreateWnd(
 #elif defined __USE_WIN32__
       wnd->win  = env->dc.win;
       wnd->wout = env->dc.wout;
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
       wnd->kbid   = env->dc.kbid;
       wnd->win = env->dc.win;
       wnd->iochan = env->dc.iochan;
@@ -1196,7 +1196,7 @@ TWND _TuiCreateWnd(
         wnd->x = x;
         wnd->lines = lines;
         wnd->cols = cols;
-#elif __USE_TTY__
+#elif __USE_VMS__
         wnd->y       = (y > 0 && y < VMS_ROWS ? y : 0);
         wnd->x       = (x > 0 && x < VMS_COLUMNS  ? x : 0);
         wnd->lines   = (lines > 0 && lines < VMS_ROWS     ? lines : VMS_ROWS);
@@ -2201,7 +2201,7 @@ TLONG  TuiGetChar()
             }
         }
     }
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
   TENV env = TuiGetEnv();
   return (TLONG)vms_getch(&env->dc.kbid);
 #endif
@@ -3040,6 +3040,13 @@ TDWORD TuiReverseColor(TDWORD color)
 #ifdef __USE_CURSES__
   return color|A_REVERSE;
 #else
+  TLONG fg = TTY_FGCOLOR(color);
+  TLONG bg = TTY_BGCOLOR(color);
+  if (0 == fg && 0 == bg)
+  {
+      return TTY_MAKECOLOR(TTY_FOREGROUND_BLACK, TTY_BACKGROUND_WHITE);
+  }
+  return TTY_MAKECOLOR(bg-10, fg+10);
 #endif
   return color;
 }
