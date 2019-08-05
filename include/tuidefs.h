@@ -46,7 +46,7 @@ extern "C" {
 #define TVK_INSERT         KEY_IC
 #define TVK_DELETE         KEY_DC
 #define TVK_HELP           KEY_HELP
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
 #define TVK_BACK           0x7F
 #define TVK_PRIOR          0x139
 #define TVK_NEXT           0x13C
@@ -74,7 +74,7 @@ extern "C" {
 #define TVK_HELP           0x2F
 #endif /* __USE_CURSES__*/
 
-#ifdef __USE_TTY__
+#ifdef __USE_VMS__
 #define TVK_ESCAPE         0x1B
 #define TVK_NUMPAD0        0x104
 #define TVK_NUMPAD1        0x105
@@ -137,7 +137,7 @@ extern "C" {
 #define TVK_F22            KEY_F(22)
 #define TVK_F23            KEY_F(23)
 #define TVK_F24            KEY_F(24)
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
 #define TVK_F1             0x119
 #define TVK_F2             0x11a
 #define TVK_F3             0x11b
@@ -453,7 +453,8 @@ enum /*THEME_STANDARD*/
 #define TTY_ATTR_BLINK                "[5m"
 #define TTY_ATTR_REVERSE              "[7m"
 #define TTY_ATTR_INVISIBLE            "[8m"
-#define TTY_ATTR_BOLD_REVERSE         "[1;7m"
+/* dynamic tty attributes */
+#define TTY_FMT_ATTR_L                "[%dm"
 /* dynamic tty color */
 #define TTY_FMT_CURSOR_LL             "[%d;%dH"
 
@@ -509,7 +510,7 @@ enum /*THEME_STANDARD*/
 #define TTY_PRNLINE                   = "›1i"
 #define TTY_STOP_PRN                  = "›4i"
 #define TTY_START_PRN                 = "›5i"
-#elif defined __USE_TTY__
+#elif defined __USE_VMS__
 #define TTY_PRNSCR                    = "[i"
 #define TTY_PRNLINE                   = "[1i"
 #define TTY_STOP_PRN                  = "[4i"
